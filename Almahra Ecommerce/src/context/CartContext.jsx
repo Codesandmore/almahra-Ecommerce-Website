@@ -1,20 +1,26 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { storage } from "../utils/helpers.js";
 
 // Initial state
-const initialState = {
-  items: [],
-  total: 0,
-  itemCount: 0,
-  isOpen: false
+const getInitialState = () => {
+  const savedCart = storage.get("cart");
+  return (
+    savedCart || {
+      items: [],
+      total: 0,
+      itemCount: 0,
+      isOpen: false,
+    }
+  );
 };
 
 // Action types
 const CART_ACTIONS = {
-  ADD_ITEM: 'ADD_ITEM',
-  REMOVE_ITEM: 'REMOVE_ITEM',
-  UPDATE_QUANTITY: 'UPDATE_QUANTITY',
-  CLEAR_CART: 'CLEAR_CART',
-  TOGGLE_CART: 'TOGGLE_CART'
+  ADD_ITEM: "ADD_ITEM",
+  REMOVE_ITEM: "REMOVE_ITEM",
+  UPDATE_QUANTITY: "UPDATE_QUANTITY",
+  CLEAR_CART: "CLEAR_CART",
+  TOGGLE_CART: "TOGGLE_CART",
 };
 
 // Cart reducer
@@ -23,7 +29,8 @@ const cartReducer = (state, action) => {
     case CART_ACTIONS.ADD_ITEM: {
       const { product, variant, quantity = 1 } = action.payload;
       const existingItemIndex = state.items.findIndex(
-        item => item.product.id === product.id && item.variant?.id === variant?.id
+        (item) =>
+          item.product.id === product.id && item.variant?.id === variant?.id
       );
 
       let updatedItems;
@@ -35,68 +42,91 @@ const cartReducer = (state, action) => {
         );
       } else {
         const newItem = {
-          id: `${product.id}-${variant?.id || 'default'}`,
+          id: `${product.id}-${variant?.id || "default"}`,
           product,
           variant,
           quantity,
-          price: product.price
+          price: product.price,
         };
         updatedItems = [...state.items, newItem];
       }
 
-      const total = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+      const total = updatedItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      const itemCount = updatedItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
 
       return {
         ...state,
         items: updatedItems,
         total,
-        itemCount
+        itemCount,
       };
     }
 
     case CART_ACTIONS.REMOVE_ITEM: {
-      const updatedItems = state.items.filter(item => item.id !== action.payload.id);
-      const total = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+      const updatedItems = state.items.filter(
+        (item) => item.id !== action.payload.id
+      );
+      const total = updatedItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      const itemCount = updatedItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
 
       return {
         ...state,
         items: updatedItems,
         total,
-        itemCount
+        itemCount,
       };
     }
 
     case CART_ACTIONS.UPDATE_QUANTITY: {
       const { id, quantity } = action.payload;
-      
+
       if (quantity <= 0) {
-        return cartReducer(state, { type: CART_ACTIONS.REMOVE_ITEM, payload: { id } });
+        return cartReducer(state, {
+          type: CART_ACTIONS.REMOVE_ITEM,
+          payload: { id },
+        });
       }
 
-      const updatedItems = state.items.map(item =>
+      const updatedItems = state.items.map((item) =>
         item.id === id ? { ...item, quantity } : item
       );
 
-      const total = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+      const total = updatedItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      const itemCount = updatedItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
 
       return {
         ...state,
         items: updatedItems,
         total,
-        itemCount
+        itemCount,
       };
     }
 
     case CART_ACTIONS.CLEAR_CART:
-      return initialState;
+      return getInitialState();
 
     case CART_ACTIONS.TOGGLE_CART:
       return {
         ...state,
-        isOpen: !state.isOpen
+        isOpen: !state.isOpen,
       };
 
     default:
@@ -109,26 +139,31 @@ const CartContext = createContext();
 
 // Cart provider component
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, getInitialState());
+
+  // Save cart to localStorage whenever state changes
+  useEffect(() => {
+    storage.set("cart", state);
+  }, [state]);
 
   const addToCart = (product, variant = null, quantity = 1) => {
     dispatch({
       type: CART_ACTIONS.ADD_ITEM,
-      payload: { product, variant, quantity }
+      payload: { product, variant, quantity },
     });
   };
 
   const removeFromCart = (id) => {
     dispatch({
       type: CART_ACTIONS.REMOVE_ITEM,
-      payload: { id }
+      payload: { id },
     });
   };
 
   const updateQuantity = (id, quantity) => {
     dispatch({
       type: CART_ACTIONS.UPDATE_QUANTITY,
-      payload: { id, quantity }
+      payload: { id, quantity },
     });
   };
 
@@ -146,21 +181,17 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
-    toggleCart
+    toggleCart,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 // Custom hook to use cart context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 };

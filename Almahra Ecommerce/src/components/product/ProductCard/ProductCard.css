@@ -200,11 +200,19 @@
   border: 2px solid var(--border-light);
   cursor: pointer;
   transition: transform var(--transition-fast);
+  background: none;
+  padding: 0;
 }
 
 .product-card__color:hover {
   transform: scale(1.1);
   border-color: var(--primary-color);
+}
+
+.product-card__color--selected {
+  border-color: var(--primary-color);
+  border-width: 3px;
+  transform: scale(1.1);
 }
 
 .product-card__color-more {
@@ -224,15 +232,15 @@
   .product-card__content {
     padding: var(--spacing-md);
   }
-  
+
   .product-card__name {
     font-size: var(--font-size-sm);
   }
-  
+
   .product-card__current-price {
     font-size: var(--font-size-base);
   }
-  
+
   .product-card__actions {
     position: static;
     opacity: 1;

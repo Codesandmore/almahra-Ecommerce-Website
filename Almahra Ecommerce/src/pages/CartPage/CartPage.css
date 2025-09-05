@@ -1,0 +1,17 @@
+.cart-page {
+  min-height: calc(100vh - 200px);
+  padding: 2rem 0;
+  background-color: #f8f9fa;
+}
+
+.cart-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+  .cart-page {
+    padding: 1rem 0;
+  }
+}
