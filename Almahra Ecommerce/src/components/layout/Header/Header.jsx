@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Header.css';
-import Button from '../../common/Button/Button.jsx';
-import { useCart } from '../../../context/CartContext.jsx';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Header.css";
+import Button from "../../common/Button/Button.jsx";
+import { useCart } from "../../../context/CartContext.jsx";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { itemCount, toggleCart } = useCart();
+  const { itemCount } = useCart();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
+  const handleCartClick = () => navigate("/cart");
 
   return (
     <header className="header">
@@ -23,8 +25,12 @@ const Header = () => {
               <span>📧 info@almahra-opticals.com</span>
             </div>
             <div className="header__auth">
-              <Button variant="ghost" size="small">Login</Button>
-              <Button variant="ghost" size="small">Register</Button>
+              <Button variant="ghost" size="small">
+                Login
+              </Button>
+              <Button variant="ghost" size="small">
+                Register
+              </Button>
             </div>
           </div>
         </div>
@@ -37,19 +43,35 @@ const Header = () => {
             {/* Logo */}
             <div className="header__logo">
               <Link to="/" className="header__logo-link">
-                <img src="/images/logo.svg" alt="Almahra Opticals" className="header__logo-img" />
+                <img
+                  src="/images/logo.svg"
+                  alt="Almahra Opticals"
+                  className="header__logo-img"
+                />
                 <span className="header__logo-text">Almahra Opticals</span>
               </Link>
             </div>
 
             {/* Navigation */}
-            <nav className={`header__nav ${isMenuOpen ? 'header__nav--open' : ''}`}>
+            <nav
+              className={`header__nav ${isMenuOpen ? "header__nav--open" : ""}`}
+            >
               <ul className="header__nav-list">
-                <li><Link to="/" className="header__nav-link">Home</Link></li>
+                <li>
+                  <Link to="/" className="header__nav-link">
+                    Home
+                  </Link>
+                </li>
                 <li className="header__nav-item--dropdown">
                   <Link to="/products" className="header__nav-link">
                     Products
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
                       <polyline points="6,9 12,15 18,9"></polyline>
                     </svg>
                   </Link>
@@ -58,40 +80,86 @@ const Header = () => {
                       <div className="header__dropdown-section">
                         <h3>Categories</h3>
                         <ul>
-                          <li><Link to="/products?category=sunglasses">Sunglasses</Link></li>
-                          <li><Link to="/products?category=prescription">Prescription Glasses</Link></li>
-                          <li><Link to="/products?category=reading">Reading Glasses</Link></li>
-                          <li><Link to="/products?category=contacts">Contact Lenses</Link></li>
+                          <li>
+                            <Link to="/products?category=sunglasses">
+                              Sunglasses
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/products?category=prescription">
+                              Prescription Glasses
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/products?category=reading">
+                              Reading Glasses
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/products?category=contacts">
+                              Contact Lenses
+                            </Link>
+                          </li>
                         </ul>
                       </div>
                       <div className="header__dropdown-section">
                         <h3>Brands</h3>
                         <ul>
-                          <li><Link to="/products?brand=ray-ban">Ray-Ban</Link></li>
-                          <li><Link to="/products?brand=oakley">Oakley</Link></li>
-                          <li><Link to="/products?brand=persol">Persol</Link></li>
-                          <li><Link to="/products?brand=maui-jim">Maui Jim</Link></li>
+                          <li>
+                            <Link to="/products?brand=ray-ban">Ray-Ban</Link>
+                          </li>
+                          <li>
+                            <Link to="/products?brand=oakley">Oakley</Link>
+                          </li>
+                          <li>
+                            <Link to="/products?brand=persol">Persol</Link>
+                          </li>
+                          <li>
+                            <Link to="/products?brand=maui-jim">Maui Jim</Link>
+                          </li>
                         </ul>
                       </div>
                     </div>
                   </div>
                 </li>
-                <li><Link to="/try-ar" className="header__nav-link">Try AR</Link></li>
-                <li><Link to="/appointments" className="header__nav-link">Book Appointment</Link></li>
-                <li><Link to="/about" className="header__nav-link">About</Link></li>
-                <li><Link to="/contact" className="header__nav-link">Contact</Link></li>
+                <li>
+                  <Link to="/try-ar" className="header__nav-link">
+                    Try AR
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/appointments" className="header__nav-link">
+                    Book Appointment
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" className="header__nav-link">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="header__nav-link">
+                    Contact
+                  </Link>
+                </li>
               </ul>
             </nav>
 
             {/* Actions */}
             <div className="header__actions">
               {/* Search */}
-              <button 
+              <button
                 className="header__action-btn"
                 onClick={toggleSearch}
                 aria-label="Search"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <circle cx="11" cy="11" r="8"></circle>
                   <path d="M21 21l-4.35-4.35"></path>
                 </svg>
@@ -99,26 +167,44 @@ const Header = () => {
 
               {/* Wishlist */}
               <button className="header__action-btn" aria-label="Wishlist">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </button>
 
               {/* Account */}
               <button className="header__action-btn" aria-label="Account">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
               </button>
 
               {/* Cart */}
-              <button 
+              <button
                 className="header__action-btn header__cart-btn"
-                onClick={toggleCart}
+                onClick={handleCartClick}
                 aria-label="Shopping Cart"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path d="M9 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
                   <path d="M20 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -129,12 +215,16 @@ const Header = () => {
               </button>
 
               {/* Mobile Menu Toggle */}
-              <button 
+              <button
                 className="header__menu-toggle"
                 onClick={toggleMenu}
                 aria-label="Toggle Menu"
               >
-                <span className={`header__hamburger ${isMenuOpen ? 'header__hamburger--open' : ''}`}>
+                <span
+                  className={`header__hamburger ${
+                    isMenuOpen ? "header__hamburger--open" : ""
+                  }`}
+                >
                   <span></span>
                   <span></span>
                   <span></span>
@@ -150,23 +240,32 @@ const Header = () => {
         <div className="header__search">
           <div className="container">
             <div className="header__search-content">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Search for glasses, brands, or styles..."
                 className="header__search-input"
                 autoFocus
               />
               <button className="header__search-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <circle cx="11" cy="11" r="8"></circle>
                   <path d="M21 21l-4.35-4.35"></path>
                 </svg>
               </button>
-              <button 
-                className="header__search-close"
-                onClick={toggleSearch}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <button className="header__search-close" onClick={toggleSearch}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
