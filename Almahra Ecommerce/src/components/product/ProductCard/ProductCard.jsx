@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ProductCard.css";
 import Button from "../../common/Button/Button.jsx";
 import { formatCurrency } from "../../../utils/helpers.js";
@@ -6,6 +7,7 @@ import { useCart } from "../../../context/CartContext.jsx";
 
 const ProductCard = ({ product, className = "" }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants?.[0] || null
   );
@@ -16,6 +18,10 @@ const ProductCard = ({ product, className = "" }) => {
 
   const handleVariantSelect = (variant) => {
     setSelectedVariant(variant);
+  };
+
+  const handleTryAR = () => {
+    navigate('/try-ar', { state: { product } });
   };
 
   const discountPercentage = product.originalPrice
@@ -156,6 +162,22 @@ const ProductCard = ({ product, className = "" }) => {
             )}
           </div>
         )}
+
+        {/* Try AR Button */}
+        <Button
+          variant="secondary"
+          size="medium"
+          onClick={handleTryAR}
+          className="product-card__try-ar"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          }
+        >
+          Try AR
+        </Button>
 
         {/* Add to Cart Button */}
         <Button

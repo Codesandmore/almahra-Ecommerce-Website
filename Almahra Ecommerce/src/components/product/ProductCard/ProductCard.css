@@ -221,6 +221,12 @@
   margin-left: var(--spacing-xs);
 }
 
+/* Try AR Button */
+.product-card__try-ar {
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
 /* Add to Cart Button */
 .product-card__add-to-cart {
   margin-top: auto;

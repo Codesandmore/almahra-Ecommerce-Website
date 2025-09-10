@@ -1,45 +1,39 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ProductCard from '../../components/product/ProductCard/ProductCard.jsx';
-import { products } from '../../data/mockData.js';
+import { products, frameTypes, frameShapes, materials } from '../../data/mockData.js';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
   const { category: urlCategory } = useParams();
   const [searchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedFrameType, setSelectedFrameType] = useState('all');
+  const [selectedFrameShape, setSelectedFrameShape] = useState('all');
+  const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
   // Initialize filters from URL parameters
   useEffect(() => {
-    if (urlCategory) {
-      setSelectedCategory(urlCategory);
-    }
+    const frameTypeParam = searchParams.get('frameType');
+    const frameShapeParam = searchParams.get('frameShape');
+    const materialParam = searchParams.get('material');
     
-    const categoryParam = searchParams.get('category');
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
+    if (frameTypeParam) setSelectedFrameType(frameTypeParam);
+    if (frameShapeParam) setSelectedFrameShape(frameShapeParam);
+    if (materialParam) setSelectedMaterial(materialParam);
   }, [urlCategory, searchParams]);
-
-  // Filter categories
-  const categories = [
-    { id: 'all', name: 'All Categories', count: products.length },
-    { id: 'aviators', name: 'Aviators', count: products.filter(p => p.category === 'aviators').length },
-    { id: 'wayfarers', name: 'Wayfarers', count: products.filter(p => p.category === 'wayfarers').length },
-    { id: 'clubmaster', name: 'Clubmaster', count: products.filter(p => p.category === 'clubmaster').length },
-    { id: 'round', name: 'Round', count: products.filter(p => p.category === 'round').length },
-    { id: 'square', name: 'Square', count: products.filter(p => p.category === 'square').length }
-  ];
 
   // Filter products
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
-      const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
-      return categoryMatch;
+      const frameTypeMatch = selectedFrameType === 'all' || product.frameType === selectedFrameType;
+      const frameShapeMatch = selectedFrameShape === 'all' || product.frameShape === selectedFrameShape;
+      const materialMatch = selectedMaterial === 'all' || product.material === selectedMaterial;
+      
+      return frameTypeMatch && frameShapeMatch && materialMatch;
     });
-  }, [selectedCategory]);
+  }, [selectedFrameType, selectedFrameShape, selectedMaterial]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
@@ -47,7 +41,9 @@ const ProductsPage = () => {
   const currentProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
 
   const clearFilters = () => {
-    setSelectedCategory('all');
+    setSelectedFrameType('all');
+    setSelectedFrameShape('all');
+    setSelectedMaterial('all');
     setCurrentPage(1);
   };
 
@@ -69,24 +65,124 @@ const ProductsPage = () => {
             </div>
 
             <div className="filter-group">
-              <h4 className="filter-group__title">Categories</h4>
+              <h4 className="filter-group__title">Frame Type</h4>
               <ul className="filter-list">
-                {categories.map(category => (
-                  <li key={category.id} className="filter-item">
+                <li className="filter-item">
+                  <label className="filter-label">
+                    <input
+                      type="radio"
+                      name="frameType"
+                      value="all"
+                      checked={selectedFrameType === 'all'}
+                      onChange={(e) => {
+                        setSelectedFrameType(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="filter-input"
+                    />
+                    <span className="filter-text">All Frame Types</span>
+                  </label>
+                </li>
+                {frameTypes.map(frameType => (
+                  <li key={frameType.id} className="filter-item">
                     <label className="filter-label">
                       <input
                         type="radio"
-                        name="category"
-                        value={category.id}
-                        checked={selectedCategory === category.id}
+                        name="frameType"
+                        value={frameType.id}
+                        checked={selectedFrameType === frameType.id}
                         onChange={(e) => {
-                          setSelectedCategory(e.target.value);
+                          setSelectedFrameType(e.target.value);
                           setCurrentPage(1);
                         }}
                         className="filter-input"
                       />
                       <span className="filter-text">
-                        {category.name}
+                        {frameType.name}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="filter-group">
+              <h4 className="filter-group__title">Frame Shape</h4>
+              <ul className="filter-list">
+                <li className="filter-item">
+                  <label className="filter-label">
+                    <input
+                      type="radio"
+                      name="frameShape"
+                      value="all"
+                      checked={selectedFrameShape === 'all'}
+                      onChange={(e) => {
+                        setSelectedFrameShape(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="filter-input"
+                    />
+                    <span className="filter-text">All Frame Shapes</span>
+                  </label>
+                </li>
+                {frameShapes.map(frameShape => (
+                  <li key={frameShape.id} className="filter-item">
+                    <label className="filter-label">
+                      <input
+                        type="radio"
+                        name="frameShape"
+                        value={frameShape.id}
+                        checked={selectedFrameShape === frameShape.id}
+                        onChange={(e) => {
+                          setSelectedFrameShape(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="filter-input"
+                      />
+                      <span className="filter-text">
+                        {frameShape.name}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="filter-group">
+              <h4 className="filter-group__title">Material</h4>
+              <ul className="filter-list">
+                <li className="filter-item">
+                  <label className="filter-label">
+                    <input
+                      type="radio"
+                      name="material"
+                      value="all"
+                      checked={selectedMaterial === 'all'}
+                      onChange={(e) => {
+                        setSelectedMaterial(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="filter-input"
+                    />
+                    <span className="filter-text">All Materials</span>
+                  </label>
+                </li>
+                {materials.map(material => (
+                  <li key={material.id} className="filter-item">
+                    <label className="filter-label">
+                      <input
+                        type="radio"
+                        name="material"
+                        value={material.id}
+                        checked={selectedMaterial === material.id}
+                        onChange={(e) => {
+                          setSelectedMaterial(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="filter-input"
+                      />
+                      <span className="filter-text">
+                        {material.name}
                       </span>
                     </label>
                   </li>
