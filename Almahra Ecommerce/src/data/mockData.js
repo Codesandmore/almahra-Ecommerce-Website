@@ -1,4 +1,31 @@
 // Mock data for Almahra Opticals products
+
+// Filter options for eyewear
+export const frameTypes = [
+  { id: 'full-rim', name: 'Full Rim' },
+  { id: 'rimless', name: 'Rimless' },
+  { id: 'half-rim', name: 'Half Rim' }
+];
+
+export const frameShapes = [
+  { id: 'rectangle', name: 'Rectangle' },
+  { id: 'square', name: 'Square' },
+  { id: 'round', name: 'Round' },
+  { id: 'oval', name: 'Oval' },
+  { id: 'aviator', name: 'Aviator' },
+  { id: 'clubmaster', name: 'Clubmaster' },
+  { id: 'geometric', name: 'Geometric' }
+];
+
+export const materials = [
+  { id: 'acetate', name: 'Acetate' },
+  { id: 'titanium', name: 'Titanium' },
+  { id: 'stainless-steel', name: 'Stainless Steel' },
+  { id: 'tr90', name: 'TR90' },
+  { id: 'cellulose-acetate', name: 'Cellulose Acetate' },
+  { id: 'ultem', name: 'Ultem' }
+];
+
 export const categories = [
   {
     id: 1,
@@ -44,6 +71,9 @@ export const products = [
     name: 'Ray-Ban Wayfarer Sunglasses',
     brand: 'Ray-Ban',
     category: 'Sunglasses',
+    frameType: 'full-rim',
+    frameShape: 'rectangle',
+    material: 'acetate',
     price: 139,
     originalPrice: 159,
     rating: 4.5,
@@ -68,6 +98,9 @@ export const products = [
     name: 'Ray-Ban Aviator Sunglasses',
     brand: 'Ray-Ban',
     category: 'Sunglasses',
+    frameType: 'rimless',
+    frameShape: 'aviator',
+    material: 'titanium',
     price: 149,
     originalPrice: 169,
     rating: 4.7,
@@ -90,6 +123,9 @@ export const products = [
     name: 'Ray-Ban Clubmaster Sunglasses',
     brand: 'Ray-Ban',
     category: 'Sunglasses',
+    frameType: 'half-rim',
+    frameShape: 'clubmaster',
+    material: 'acetate',
     price: 169,
     rating: 4.6,
     reviews: 156,
@@ -111,6 +147,9 @@ export const products = [
     name: 'Ray-Ban Justin Sunglasses',
     brand: 'Ray-Ban',
     category: 'Sunglasses',
+    frameType: 'full-rim',
+    frameShape: 'square',
+    material: 'tr90',
     price: 129,
     rating: 4.3,
     reviews: 73,
@@ -130,6 +169,9 @@ export const products = [
     name: 'Ray-Ban Round Metal Sunglasses',
     brand: 'Ray-Ban',
     category: 'Sunglasses',
+    frameType: 'full-rim',
+    frameShape: 'round',
+    material: 'stainless-steel',
     price: 159,
     rating: 4.4,
     reviews: 92,
@@ -150,6 +192,9 @@ export const products = [
     name: 'Ray-Ban Erika Sunglasses',
     brand: 'Ray-Ban',
     category: 'Sunglasses',
+    frameType: 'full-rim',
+    frameShape: 'round',
+    material: 'acetate',
     price: 149,
     rating: 4.5,
     reviews: 64,

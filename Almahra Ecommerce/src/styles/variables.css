@@ -33,15 +33,17 @@
   --text-light: #ffffff;
   
   /* Border Colors */
-  --border-light: #dee2e6;
-  --border-medium: #ced4da;
-  --border-dark: #495057;
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  --border-medium: #d1d5db;
+  --border-dark: #6b7280;
   
   /* Success, Warning, Error */
-  --success-color: #28a745;
-  --warning-color: #ffc107;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
   --error-color: #dc3545;
-  --info-color: #17a2b8;
+  --info-color: #3b82f6;
   
   /* ===== SPACING VARIABLES ===== */
   --spacing-xs: 0.25rem;
@@ -56,9 +58,11 @@
   --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-secondary: 'Playfair Display', Georgia, serif;
   
+  --font-size-2xs: 0.625rem;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
+  --font-size-md: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
