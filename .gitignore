@@ -1,0 +1,540 @@
+# =======================
+# GENERAL NODE.JS
+# =======================
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Build outputs
+build/
+dist/
+lib/
+compiled/
+out/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# =======================
+# FRONTEND (REACT/VITE)
+# =======================
+
+# Vite
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Next.js build output (if using Next.js)
+.next/
+out/
+
+# Nuxt.js build / generate output (if using Nuxt.js)
+.nuxt/
+
+# Gatsby files (if using Gatsby)
+.cache/
+public
+
+# Storybook build outputs
+storybook-static/
+
+# Rollup cache
+.rollup.cache/
+
+# Parcel cache
+.parcel-cache/
+
+# Webpack cache
+.webpack/
+
+# TailwindCSS
+# Uncomment if you generate CSS
+# src/styles/tailwind.output.css
+
+# =======================
+# BACKEND (NODE.JS/EXPRESS)
+# =======================
+
+# Prisma
+prisma/migrations/
+prisma/dev.db
+prisma/dev.db-journal
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Uploads and user files
+uploads/
+user-uploads/
+backend/uploads/
+temp/
+tmp/
+
+# Email templates compiled
+email-templates/compiled/
+
+# Redis dump files
+dump.rdb
+
+# Session files
+sessions/
+
+# SSL certificates (for local development)
+ssl/
+certs/
+*.pem
+*.key
+*.crt
+
+# =======================
+# AR SERVICE (PYTHON/FLASK)
+# =======================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Flask
+instance/
+.webassets-cache
+
+# AI/ML Model files
+*.h5
+*.pkl
+*.joblib
+*.model
+models/
+weights/
+checkpoints/
+
+# OpenCV cache
+.opencv/
+
+# MediaPipe
+.mediapipe/
+
+# =======================
+# DOCKER & DEPLOYMENT
+# =======================
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Kubernetes
+k8s/secrets/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# AWS
+.aws/
+
+# Google Cloud
+.gcloud/
+
+# Azure
+.azure/
+
+# Serverless
+.serverless/
+
+# =======================
+# DEVELOPMENT TOOLS
+# =======================
+
+# IDE and Editor files
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/*.code-snippets
+
+.idea/
+*.swp
+*.swo
+*~
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+tags
+[._]*.un~
+
+# =======================
+# OPERATING SYSTEMS
+# =======================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.com.apple.TimeMachine.localsnapshots
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =======================
+# CACHE & TEMPORARY FILES
+# =======================
+
+# Cache directories
+.cache/
+cache/
+.npm
+.yarn
+.pnp
+.pnp.js
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Backup files
+*.backup
+*.bak
+*.orig
+*~
+
+# Lock files - Choose based on your preference
+# Uncomment the ones you DON'T want to track
+# package-lock.json  # If using yarn
+# yarn.lock          # If using npm
+# pnpm-lock.yaml     # If using yarn or npm
+
+# =======================
+# MONITORING & ANALYTICS
+# =======================
+
+# Sentry
+.sentryclirc
+
+# PM2
+.pm2/
+
+# New Relic
+newrelic_agent.log
+
+# Google Analytics
+.ga
+
+# =======================
+# TESTING
+# =======================
+
+# Test results
+test-results/
+test-reports/
+junit.xml
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# =======================
+# SERVICES & EXTERNAL TOOLS
+# =======================
+
+# Stripe CLI
+.stripe/
+
+# GraphQL
+schema.graphql
+introspection.json
+
+# Chromatic
+chromatic.log
+
+# Turborepo
+.turbo/
+
+# Nx
+.nx/cache
+
+# Rush
+common/temp/
+
+# Lerna
+lerna-debug.log*
+
+# =======================
+# PROJECT SPECIFIC
+# =======================
+
+# AR Try-on service models and data
+ar-service/models/
+ar-service/data/face_landmarks/
+ar-service/cache/
+
+# Product images (development only)
+# In production, these should be in CDN/S3
+public/images/products/
+backend/public/images/
+
+# Customer uploaded images
+customer-photos/
+prescription-images/
+
+# Analytics and reports
+reports/
+analytics/
+
+# Database exports
+*.sql
+*.dump
+
+# Configuration overrides
+config.local.js
+config.local.json
+
+# =======================
+# SECURITY
+# =======================
+
+# API Keys and secrets (should use .env instead)
+secrets/
+private/
+*.pkey
+*.csr
+
+# OAuth tokens
+.oauth/
+
+# Certificate authorities
+ca-certificates/
+
+# =======================
+# DOCUMENTATION
+# =======================
+
+# Generated documentation
+docs/generated/
+api-docs/
+
+# Local documentation builds
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
+# =======================
+# DEPLOYMENT SPECIFIC
+# =======================
+
+# Vercel
+.vercel
+
+# Netlify
+.netlify/
+
+# Heroku
+.heroku/
+
+# Railway
+.railway/
+
+# AWS Amplify
+amplify/
+.amplifyrc
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# =======================
+# MONOREPO SPECIFIC
+# =======================
+
+# Workspace cache
+.workspace/
+
+# Shared build outputs
+packages/*/dist/
+packages/*/build/
+
+# Shared node_modules (if using workspaces)
+packages/*/node_modules/
