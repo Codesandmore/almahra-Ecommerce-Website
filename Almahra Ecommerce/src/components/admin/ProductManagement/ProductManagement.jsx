@@ -9,6 +9,14 @@ const ProductManagement = () => {
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
+  // Helper function to calculate total stock from variants
+  const getTotalStock = (product) => {
+    if (!product.variants || product.variants.length === 0) {
+      return 0;
+    }
+    return product.variants.reduce((total, variant) => total + variant.stock, 0);
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFrameType = selectedFrameType === 'all' || product.frameType === selectedFrameType;
@@ -133,9 +141,22 @@ const ProductManagement = () => {
                 <span className="product-card__category">{product.category}</span>
               </div>
               <div className="product-card__stock">
-                <span className={`stock-indicator ${product.inStock ? 'stock-indicator--in-stock' : 'stock-indicator--out-of-stock'}`}>
-                  {product.inStock ? 'In Stock' : 'Out of Stock'}
-                </span>
+                {(() => {
+                  const totalStock = getTotalStock(product);
+                  const isInStock = totalStock > 0;
+                  return (
+                    <span className={`stock-indicator ${isInStock ? 'stock-indicator--in-stock' : 'stock-indicator--out-of-stock'}`}>
+                      {isInStock ? (
+                        <>
+                          <span className="stock-count">{totalStock}</span>
+                          <span className="stock-text">in stock</span>
+                        </>
+                      ) : (
+                        'Out of Stock'
+                      )}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           </div>

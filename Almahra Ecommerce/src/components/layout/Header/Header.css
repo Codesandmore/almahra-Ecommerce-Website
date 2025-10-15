@@ -28,6 +28,13 @@
 .header__auth {
   display: flex;
   gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.header__user-greeting {
+  font-size: var(--font-size-sm);
+  color: var(--text-light);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Main Header */
