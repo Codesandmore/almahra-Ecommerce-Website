@@ -254,3 +254,168 @@ export const testimonials = [
     image: '/images/testimonials/emily.jpg'
   }
 ];
+
+// Mock user data
+export const mockUser = {
+  id: 1,
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  phone: '+91 98765 43210',
+  dateOfBirth: '1990-05-15',
+  gender: 'male',
+  avatar: '/images/avatars/default-avatar.png',
+  joinDate: '2023-01-15',
+  loyaltyPoints: 450,
+  preferredFrameType: 'full-rim',
+  preferredFrameShape: 'rectangle',
+  eyePrescription: {
+    rightEye: {
+      sphere: -2.5,
+      cylinder: -0.5,
+      axis: 90
+    },
+    leftEye: {
+      sphere: -2.0,
+      cylinder: -0.25,
+      axis: 85
+    },
+    pd: 64,
+    lastUpdated: '2024-03-15'
+  }
+};
+
+// Mock user addresses
+export const mockAddresses = [
+  {
+    id: 1,
+    type: 'home',
+    isDefault: true,
+    firstName: 'John',
+    lastName: 'Doe',
+    addressLine1: '123 Main Street',
+    addressLine2: 'Apt 4B',
+    city: 'New Delhi',
+    state: 'Delhi',
+    postalCode: '110001',
+    country: 'India',
+    phone: '+91 98765 43210'
+  },
+  {
+    id: 2,
+    type: 'office',
+    isDefault: false,
+    firstName: 'John',
+    lastName: 'Doe',
+    addressLine1: '456 Business Park',
+    addressLine2: 'Floor 5, Office 502',
+    city: 'Gurgaon',
+    state: 'Haryana',
+    postalCode: '122001',
+    country: 'India',
+    phone: '+91 98765 43211'
+  }
+];
+
+// Mock user orders
+export const mockUserOrders = [
+  {
+    id: 'ORD-2024-001',
+    date: '2024-09-15',
+    status: 'delivered',
+    total: 8500,
+    items: [
+      {
+        id: 1,
+        name: 'Ray-Ban Wayfarer Sunglasses',
+        brand: 'Ray-Ban',
+        image: '/images/placeholder.svg',
+        price: 8500,
+        quantity: 1,
+        variant: 'Black'
+      }
+    ],
+    shippingAddress: {
+      addressLine1: '123 Main Street',
+      addressLine2: 'Apt 4B',
+      city: 'New Delhi',
+      state: 'Delhi',
+      postalCode: '110001'
+    },
+    trackingNumber: 'TRK123456789'
+  },
+  {
+    id: 'ORD-2024-002',
+    date: '2024-08-20',
+    status: 'delivered',
+    total: 12000,
+    items: [
+      {
+        id: 2,
+        name: 'Oakley Holbrook Sunglasses',
+        brand: 'Oakley',
+        image: '/images/placeholder.svg',
+        price: 12000,
+        quantity: 1,
+        variant: 'Matte Black'
+      }
+    ],
+    shippingAddress: {
+      addressLine1: '123 Main Street',
+      addressLine2: 'Apt 4B',
+      city: 'New Delhi',
+      state: 'Delhi',
+      postalCode: '110001'
+    },
+    trackingNumber: 'TRK987654321'
+  },
+  {
+    id: 'ORD-2024-003',
+    date: '2024-09-25',
+    status: 'processing',
+    total: 15500,
+    items: [
+      {
+        id: 3,
+        name: 'Tom Ford Prescription Glasses',
+        brand: 'Tom Ford',
+        image: '/images/placeholder.svg',
+        price: 15500,
+        quantity: 1,
+        variant: 'Brown Tortoise'
+      }
+    ],
+    shippingAddress: {
+      addressLine1: '456 Business Park',
+      addressLine2: 'Floor 5, Office 502',
+      city: 'Gurgaon',
+      state: 'Haryana',
+      postalCode: '122001'
+    },
+    trackingNumber: 'TRK456789123'
+  }
+];
+
+// Mock wishlist items
+export const mockWishlist = [
+  {
+    id: 4,
+    name: 'Persol PO3019S Sunglasses',
+    brand: 'Persol',
+    price: 18500,
+    originalPrice: 21000,
+    image: '/images/placeholder.svg',
+    inStock: true,
+    addedDate: '2024-09-20'
+  },
+  {
+    id: 5,
+    name: 'Maui Jim Peahi Sunglasses',
+    brand: 'Maui Jim',
+    price: 16800,
+    originalPrice: 16800,
+    image: '/images/placeholder.svg',
+    inStock: false,
+    addedDate: '2024-09-10'
+  }
+];

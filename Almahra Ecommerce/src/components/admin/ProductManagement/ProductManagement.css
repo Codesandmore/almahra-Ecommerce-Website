@@ -210,6 +210,16 @@
   color: #dc2626;
 }
 
+/* Stock count styling */
+.stock-count {
+  font-weight: var(--font-weight-bold);
+  margin-right: var(--spacing-xs);
+}
+
+.stock-text {
+  font-weight: var(--font-weight-medium);
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

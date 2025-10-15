@@ -3,16 +3,23 @@ import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 import Button from "../../common/Button/Button.jsx";
 import { useCart } from "../../../context/CartContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { itemCount } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
   const handleCartClick = () => navigate("/cart");
+  
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <header className="header">
@@ -25,12 +32,25 @@ const Header = () => {
               <span>📧 info@almahra-opticals.com</span>
             </div>
             <div className="header__auth">
-              <Button variant="ghost" size="small">
-                Login
-              </Button>
-              <Button variant="ghost" size="small">
-                Register
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <span className="header__user-greeting">
+                    Hello, {user.firstName}!
+                  </span>
+                  <Button variant="ghost" size="small" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="small" onClick={() => navigate("/login")}>
+                    Login
+                  </Button>
+                  <Button variant="ghost" size="small" onClick={() => navigate("/login")}>
+                    Register
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -179,7 +199,7 @@ const Header = () => {
               </button>
 
               {/* Account */}
-              <button className="header__action-btn" aria-label="Account">
+              <Link to="/profile" className="header__action-btn" aria-label="Account">
                 <svg
                   width="20"
                   height="20"
@@ -190,7 +210,7 @@ const Header = () => {
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-              </button>
+              </Link>
 
               {/* Cart */}
               <button

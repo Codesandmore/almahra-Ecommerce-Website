@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import './OrderManagement.css';
 
 const OrderManagement = () => {
   const [selectedTab, setSelectedTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' for ascending, 'desc' for descending
   
   // Debug: Log component load and CSS
   console.log('OrderManagement component loaded');
@@ -68,9 +70,30 @@ const OrderManagement = () => {
     { id: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length }
   ];
 
-  const filteredOrders = selectedTab === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === selectedTab);
+  // Filter and sort orders with useMemo for performance
+  const filteredAndSortedOrders = useMemo(() => {
+    let filtered = selectedTab === 'all' 
+      ? orders 
+      : orders.filter(order => order.status === selectedTab);
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(order => 
+        order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.id.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply date sorting
+    filtered = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+    
+    return filtered;
+  }, [selectedTab, searchTerm, sortOrder]);
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -111,6 +134,49 @@ const OrderManagement = () => {
         </div>
       </div>
 
+      {/* Search and Filter Controls */}
+      <div className="order-controls">
+        <div className="search-controls">
+          <div className="search-box">
+            <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by customer name, email or order ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="search-clear"
+                title="Clear search"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          <div className="sort-controls">
+            <label className="sort-label">Sort by date:</label>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="sort-select"
+            >
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Order Tabs */}
       <div className="order-tabs">
         {tabs.map(tab => (
@@ -128,7 +194,14 @@ const OrderManagement = () => {
 
       {/* Orders List */}
       <div className="orders-container">
-        {filteredOrders.map(order => (
+        {filteredAndSortedOrders.length > 0 && (
+          <div className="orders-summary">
+            Showing {filteredAndSortedOrders.length} of {orders.length} orders
+            {searchTerm && <span className="search-results"> for "{searchTerm}"</span>}
+          </div>
+        )}
+        
+        {filteredAndSortedOrders.map(order => (
           <div key={order.id} className="order-card">
             <div className="order-card__header">
               <div className="order-card__id">
@@ -187,7 +260,7 @@ const OrderManagement = () => {
         ))}
       </div>
 
-      {filteredOrders.length === 0 && (
+      {filteredAndSortedOrders.length === 0 && (
         <div className="empty-state">
           <div className="empty-state__icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">

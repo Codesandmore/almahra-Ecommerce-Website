@@ -69,9 +69,14 @@ const cartReducer = (state, action) => {
     }
 
     case CART_ACTIONS.REMOVE_ITEM: {
+      console.log('REMOVE_ITEM action called with ID:', action.payload.id);
+      console.log('Current cart items:', state.items.map(item => ({ id: item.id, name: item.product.name })));
+      
       const updatedItems = state.items.filter(
         (item) => item.id !== action.payload.id
       );
+      
+      console.log('Items after removal:', updatedItems.map(item => ({ id: item.id, name: item.product.name })));
       const total = updatedItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
