@@ -101,6 +101,22 @@
   margin-top: var(--spacing-xs);
 }
 
+.forgot-password-link {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  text-decoration: none;
+  margin-top: var(--spacing-sm);
+  text-align: right;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 .form-error--submit {
   background: rgba(239, 68, 68, 0.1);
   color: var(--danger-color);

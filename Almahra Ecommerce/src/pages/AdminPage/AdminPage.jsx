@@ -5,6 +5,7 @@ import ProductManagement from '../../components/admin/ProductManagement/ProductM
 import OrderManagement from '../../components/admin/OrderManagement/OrderManagement.jsx';
 import UserManagement from '../../components/admin/UserManagement/UserManagement.jsx';
 import AnalyticsDashboard from '../../components/admin/AnalyticsDashboard/AnalyticsDashboard.jsx';
+import EmailLog from '../../components/admin/EmailLog/EmailLog.jsx';
 import './AdminPage.css';
 
 const AdminPage = () => {
@@ -23,6 +24,8 @@ const AdminPage = () => {
         return <UserManagement />;
       case 'analytics':
         return <AnalyticsDashboard />;
+      case 'emails':
+        return <EmailLog />;
       default:
         return <DashboardOverview />;
     }

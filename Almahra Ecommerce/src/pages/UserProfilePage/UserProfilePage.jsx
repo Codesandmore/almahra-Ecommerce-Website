@@ -6,6 +6,7 @@ import ProfileTabs from '../../components/user/ProfileTabs/ProfileTabs.jsx';
 import PersonalInfo from '../../components/user/PersonalInfo/PersonalInfo.jsx';
 import OrderHistory from '../../components/user/OrderHistory/OrderHistory.jsx';
 import AddressBook from '../../components/user/AddressBook/AddressBook.jsx';
+import MyAppointments from '../../components/user/MyAppointments/MyAppointments.jsx';
 import { 
   mockUserOrders, 
   mockWishlist 
@@ -91,6 +92,10 @@ const UserProfilePage = () => {
       case 'orders':
         return (
           <OrderHistory orders={orders} />
+        );
+      case 'appointments':
+        return (
+          <MyAppointments />
         );
       case 'addresses':
         return (
