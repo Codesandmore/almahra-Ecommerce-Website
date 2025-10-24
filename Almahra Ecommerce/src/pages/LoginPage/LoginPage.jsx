@@ -248,6 +248,11 @@ const LoginPage = () => {
               placeholder="Enter your password"
             />
             {errors.password && <span className="form-error">{errors.password}</span>}
+            {isLogin && (
+              <Link to="/forgot-password" className="forgot-password-link">
+                Forgot Password?
+              </Link>
+            )}
           </div>
 
           {!isLogin && (

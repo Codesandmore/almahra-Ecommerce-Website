@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import emailService from '../services/emailService';
 
 const AuthContext = createContext();
 
@@ -43,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       const newUser = {
         id: Date.now().toString(),
         email: userData.email,
+        password: userData.password, // Store password (in production, this should be hashed)
         firstName: userData.firstName,
         lastName: userData.lastName,
         phone: userData.phone || '',
@@ -56,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
       // Check if user already exists (simulate API validation)
       const existingUsers = JSON.parse(localStorage.getItem('almahra_users') || '[]');
-      const emailExists = existingUsers.find(u => u.email === userData.email);
+      const emailExists = existingUsers.find(u => u.email.toLowerCase() === userData.email.toLowerCase());
       
       if (emailExists) {
         throw new Error('User with this email already exists');
@@ -80,6 +82,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('almahra_users', JSON.stringify(existingUsers));
 
       setUser(newUser);
+      
+      // Send welcome email
+      await emailService.sendWelcomeEmail(newUser);
+      
       return { success: true, user: newUser };
     } catch (error) {
       return { success: false, error: error.message };
@@ -96,7 +102,7 @@ export const AuthProvider = ({ children }) => {
       let foundUser;
       
       if (isEmail) {
-        foundUser = existingUsers.find(u => u.email === emailOrPhone);
+        foundUser = existingUsers.find(u => u.email.toLowerCase() === emailOrPhone.toLowerCase());
       } else {
         // Clean phone number for comparison (remove spaces, dashes, etc.)
         const cleanInput = emailOrPhone.replace(/[\s\-()]/g, '');
@@ -107,12 +113,12 @@ export const AuthProvider = ({ children }) => {
       }
       
       if (!foundUser) {
-        throw new Error('User not found with this ' + (isEmail ? 'email' : 'phone number'));
+        throw new Error('No account found with this ' + (isEmail ? 'email' : 'phone number'));
       }
 
+      // Verify password
       // In a real app, you'd verify the password hash
-      // For demo purposes, we'll just check if password is provided
-      if (!password || password.length < 6) {
+      if (!password || password !== foundUser.password) {
         throw new Error('Invalid password');
       }
 

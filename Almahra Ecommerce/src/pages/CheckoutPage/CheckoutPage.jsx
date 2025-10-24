@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useCart } from "../../context/CartContext.jsx";
 import { formatCurrency, validators } from "../../utils/helpers.js";
 import Button from "../../components/common/Button/Button.jsx";
+import emailService from "../../services/emailService.js";
 import "./CheckoutPage.css";
 
 const CheckoutPage = () => {
@@ -102,11 +103,39 @@ const CheckoutPage = () => {
 
     setIsProcessing(true);
 
+    // Create order object
+    const order = {
+      id: 'ORD' + Date.now(),
+      date: new Date().toISOString(),
+      customerName: `${formData.firstName} ${formData.lastName}`,
+      email: formData.email,
+      items: items.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      total: total,
+      status: 'processing',
+      trackingNumber: 'TRACK' + Date.now(),
+      estimatedDelivery: '3-5 business days',
+      shippingAddress: {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        country: formData.country
+      }
+    };
+
     // Simulate order processing
-    setTimeout(() => {
+    setTimeout(async () => {
+      // Send order confirmation email
+      await emailService.sendOrderConfirmation(order, formData.email);
+      
+      // Clear cart before moving to confirmation step
+      clearCart();
       setIsProcessing(false);
       setStep(3);
-      clearCart();
     }, 2000);
   };
 

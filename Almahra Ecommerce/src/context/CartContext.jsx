@@ -126,7 +126,12 @@ const cartReducer = (state, action) => {
     }
 
     case CART_ACTIONS.CLEAR_CART:
-      return getInitialState();
+      return {
+        items: [],
+        total: 0,
+        itemCount: 0,
+        isOpen: false,
+      };
 
     case CART_ACTIONS.TOGGLE_CART:
       return {

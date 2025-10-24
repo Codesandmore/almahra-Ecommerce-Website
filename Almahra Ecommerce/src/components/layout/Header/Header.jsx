@@ -148,7 +148,7 @@ const Header = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/appointments" className="header__nav-link">
+                  <Link to="/appointment" className="header__nav-link">
                     Book Appointment
                   </Link>
                 </li>

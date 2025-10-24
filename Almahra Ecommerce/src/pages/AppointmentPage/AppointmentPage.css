@@ -1,0 +1,138 @@
+.appointment-page {
+  min-height: calc(100vh - var(--header-height, 80px));
+  padding: var(--spacing-xl) var(--spacing-md);
+  background: var(--bg-light);
+}
+
+.appointment-page__container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.appointment-page__header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.appointment-page__header h1 {
+  font-size: var(--font-size-3xl);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.appointment-page__steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.step--active {
+  opacity: 1;
+}
+
+.step--completed {
+  opacity: 1;
+}
+
+.step__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--border-color);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+  transition: all 0.3s ease;
+}
+
+.step--active .step__number {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.step--completed .step__number {
+  background: var(--success-color);
+  color: var(--white);
+}
+
+.step--completed .step__number::before {
+  content: '✓';
+  font-size: var(--font-size-lg);
+}
+
+.step--completed .step__number {
+  font-size: 0;
+}
+
+.step__label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.step--active .step__label {
+  color: var(--primary-color);
+}
+
+.step-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--border-color);
+  margin-bottom: 24px;
+}
+
+.appointment-page__content {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-xl);
+  min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .appointment-page {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .appointment-page__header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .appointment-page__steps {
+    gap: var(--spacing-sm);
+  }
+
+  .step__number {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-sm);
+  }
+
+  .step__label {
+    font-size: var(--font-size-xs);
+  }
+
+  .step-divider {
+    width: 30px;
+  }
+
+  .appointment-page__content {
+    padding: var(--spacing-lg);
+  }
+}
