@@ -17,6 +17,7 @@ export const countryCodes = [
   { code: '+7', country: 'Russia', flag: '🇷🇺', minLength: 10, maxLength: 10, format: 'XXX XXX XXXX' },
   { code: '+27', country: 'South Africa', flag: '🇿🇦', minLength: 9, maxLength: 9, format: 'XX XXX XXXX' },
   { code: '+971', country: 'UAE', flag: '🇦🇪', minLength: 8, maxLength: 9, format: 'XX XXX XXXX' },
+  { code: '+974', country: 'Qatar', flag: '🇶🇦', minLength: 8, maxLength: 8, format: 'XXXX XXXX' },
   { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', minLength: 8, maxLength: 9, format: 'XX XXX XXXX' },
   { code: '+65', country: 'Singapore', flag: '🇸🇬', minLength: 8, maxLength: 8, format: 'XXXX XXXX' },
   { code: '+60', country: 'Malaysia', flag: '🇲🇾', minLength: 9, maxLength: 10, format: 'XX XXX XXXX' },

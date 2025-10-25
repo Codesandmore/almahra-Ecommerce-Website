@@ -30,7 +30,7 @@
   border: none;
   cursor: pointer;
   font-size: var(--font-size-sm);
-  color: var(--text-primary);
+  color: #333;
   transition: background-color 0.2s ease;
   min-width: 80px;
   justify-content: center;
@@ -47,6 +47,7 @@
 .country-code {
   font-family: var(--font-family-mono, 'Courier New', monospace);
   font-weight: var(--font-weight-medium);
+  color: #333;
 }
 
 .dropdown-arrow {
@@ -64,13 +65,14 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 9999;
   max-height: 300px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .country-dropdown__content {
@@ -90,7 +92,7 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
   font-size: var(--font-size-sm);
-  color: var(--text-primary);
+  color: #333;
 }
 
 .country-option:hover {

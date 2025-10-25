@@ -11,7 +11,7 @@ const PhoneInput = ({
   required = false,
   className = ''
 }) => {
-  const [countryCode, setCountryCode] = useState('+91');
+  const [countryCode, setCountryCode] = useState('+974');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   

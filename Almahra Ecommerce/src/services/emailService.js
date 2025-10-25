@@ -150,6 +150,38 @@ class EmailService {
     return { success: true, message: 'Password reset email sent' };
   }
 
+  // Contact form confirmation email (to customer)
+  async sendContactConfirmation(formData) {
+    const emailData = {
+      to: formData.email,
+      subject: 'We Received Your Message - Almahra Opticals',
+      type: 'contact_confirmation',
+      data: formData,
+      html: this.generateContactConfirmationHTML(formData)
+    };
+
+    console.log('📧 Sending Contact Confirmation Email:', emailData);
+    this.saveSentEmail(emailData);
+    
+    return { success: true, message: 'Contact confirmation email sent' };
+  }
+
+  // Contact form notification email (to admin)
+  async sendContactNotification(formData) {
+    const emailData = {
+      to: 'support@almahra-opticals.com',
+      subject: `New Contact Form Submission - ${formData.subject}`,
+      type: 'contact_notification',
+      data: formData,
+      html: this.generateContactNotificationHTML(formData)
+    };
+
+    console.log('📧 Sending Contact Notification Email to Admin:', emailData);
+    this.saveSentEmail(emailData);
+    
+    return { success: true, message: 'Contact notification email sent to admin' };
+  }
+
   // HTML Templates
   generateOrderConfirmationHTML(order) {
     return `
@@ -314,7 +346,7 @@ class EmailService {
         name: 'Al Sadd Branch', 
         address: 'Al Sadd, Qatar',
         phone: '+974 7118 2307',
-        mapLink: 'https://g.co/kgs/ijW1MLa'
+        mapLink: 'https://share.google/VCNjkVKBV3vCTJrgc'
       },
       'al-khor': { 
         name: 'Al Khor Branch', 
@@ -557,6 +589,129 @@ class EmailService {
             <p><strong>Almahra Opticals</strong></p>
             <p>© 2025 Almahra Opticals. All rights reserved.</p>
             <p>Contact us at support@almahra-opticals.com | +974 3033 2307</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  generateContactConfirmationHTML(formData) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .brand { background: #1a1a1a; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; }
+          .header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background: #f9f9f9; }
+          .message-box { background: white; border-left: 4px solid #2c3e50; padding: 15px; margin: 20px 0; border-radius: 4px; }
+          .detail-row { padding: 8px 0; border-bottom: 1px solid #eee; }
+          .footer { text-align: center; padding: 20px; color: #777; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="brand">ALMAHRA OPTICALS</div>
+          <div class="header">
+            <h1>✓ Message Received!</h1>
+          </div>
+          <div class="content">
+            <p>Hi ${formData.name},</p>
+            <p>Thank you for contacting <strong>Almahra Opticals</strong>. We have received your message and will get back to you within 24 hours.</p>
+            
+            <div class="message-box">
+              <h3>Your Message Details:</h3>
+              <div class="detail-row">
+                <strong>Subject:</strong> ${formData.subject}
+              </div>
+              <div class="detail-row">
+                <strong>Message:</strong><br>
+                ${formData.message}
+              </div>
+            </div>
+
+            <p>If you need immediate assistance, please call us at <strong>+974 3033 2307</strong></p>
+            <p><strong>Working Hours:</strong></p>
+            <ul style="margin: 0;">
+              <li>Saturday - Thursday: 9:30 AM - 11:00 PM</li>
+              <li>Friday: 3:00 PM - 11:00 PM</li>
+            </ul>
+          </div>
+          <div class="footer">
+            <p><strong>Almahra Opticals</strong></p>
+            <p>© 2025 Almahra Opticals. All rights reserved.</p>
+            <p>Email: support@almahra-opticals.com | Phone: +974 3033 2307</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  generateContactNotificationHTML(formData) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .brand { background: #1a1a1a; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; }
+          .header { background: #f39c12; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background: #f9f9f9; }
+          .info-box { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; }
+          .detail-row { padding: 10px 0; border-bottom: 1px solid #eee; }
+          .message-content { background: #f8f9fa; padding: 15px; margin-top: 15px; border-radius: 4px; font-style: italic; }
+          .footer { text-align: center; padding: 20px; color: #777; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="brand">ALMAHRA OPTICALS</div>
+          <div class="header">
+            <h1>🔔 New Contact Form Submission</h1>
+          </div>
+          <div class="content">
+            <p><strong>A new customer inquiry has been received:</strong></p>
+            
+            <div class="info-box">
+              <div class="detail-row">
+                <strong>Name:</strong> ${formData.name}
+              </div>
+              <div class="detail-row">
+                <strong>Email:</strong> <a href="mailto:${formData.email}">${formData.email}</a>
+              </div>
+              <div class="detail-row">
+                <strong>Phone:</strong> <a href="tel:${formData.phone}">${formData.phone}</a>
+              </div>
+              <div class="detail-row">
+                <strong>Subject:</strong> ${formData.subject}
+              </div>
+              <div class="detail-row">
+                <strong>Submitted:</strong> ${new Date().toLocaleString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
+              
+              <div class="message-content">
+                <strong>Message:</strong><br><br>
+                ${formData.message}
+              </div>
+            </div>
+
+            <p><strong>Action Required:</strong> Please respond to this inquiry within 24 hours.</p>
+          </div>
+          <div class="footer">
+            <p><strong>Almahra Opticals - Admin Notification</strong></p>
+            <p>© 2025 Almahra Opticals. All rights reserved.</p>
           </div>
         </div>
       </body>
