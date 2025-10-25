@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../../common/Button/Button.jsx';
+import PhoneInput from '../../common/PhoneInput/PhoneInput.jsx';
 import './PersonalInfo.css';
 
 const PersonalInfo = ({ user, onUpdateUser }) => {
@@ -122,13 +123,10 @@ const PersonalInfo = ({ user, onUpdateUser }) => {
               <label htmlFor="phone" className="form-label">
                 Phone Number
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
+              <PhoneInput
                 value={formData.phone}
-                onChange={handleInputChange}
-                className="form-input"
+                onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+                placeholder="Enter phone number"
                 required
               />
             </div>

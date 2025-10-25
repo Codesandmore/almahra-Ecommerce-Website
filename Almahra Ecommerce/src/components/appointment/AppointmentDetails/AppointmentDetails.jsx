@@ -39,7 +39,7 @@ const AppointmentDetails = ({ appointmentData, onSubmit, onBack }) => {
       name: 'Al Sadd Branch', 
       address: 'Al Sadd, Qatar',
       phone: '+974 7118 2307',
-      mapLink: 'https://g.co/kgs/ijW1MLa'
+      mapLink: 'https://share.google/VCNjkVKBV3vCTJrgc'
     },
     { 
       id: 'al-khor', 

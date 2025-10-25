@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../../common/Button/Button.jsx';
+import PhoneInput from '../../common/PhoneInput/PhoneInput.jsx';
 import './AddressBook.css';
 
 const AddressBook = ({ addresses, onAddAddress, onUpdateAddress, onDeleteAddress }) => {
@@ -272,13 +273,10 @@ const AddressBook = ({ addresses, onAddAddress, onUpdateAddress, onDeleteAddress
                 <label htmlFor="phone" className="form-label">
                   Phone Number
                 </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
+                <PhoneInput
                   value={formData.phone}
-                  onChange={handleInputChange}
-                  className="form-input"
+                  onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+                  placeholder="Enter phone number"
                   required
                 />
               </div>

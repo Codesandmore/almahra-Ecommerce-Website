@@ -13,6 +13,8 @@ import UserProfilePage from "./pages/UserProfilePage/UserProfilePage.jsx";
 import LoginPage from "./pages/LoginPage/LoginPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage.jsx";
 import AppointmentPage from "./pages/AppointmentPage/AppointmentPage.jsx";
+import ContactPage from "./pages/ContactPage/ContactPage.jsx";
+import AboutPage from "./pages/AboutPage/AboutPage.jsx";
 import "./styles/variables.css";
 import "./styles/global.css";
 import "./App.css";
@@ -40,6 +42,8 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/profile" element={<UserProfilePage />} />
                     <Route path="/appointment" element={<AppointmentPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/about" element={<AboutPage />} />
                   </Routes>
                 </main>
               </>

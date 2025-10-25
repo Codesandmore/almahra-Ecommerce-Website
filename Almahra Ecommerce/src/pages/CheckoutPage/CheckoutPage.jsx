@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useCart } from "../../context/CartContext.jsx";
 import { formatCurrency, validators } from "../../utils/helpers.js";
 import Button from "../../components/common/Button/Button.jsx";
+import PhoneInput from "../../components/common/PhoneInput/PhoneInput.jsx";
 import emailService from "../../services/emailService.js";
 import "./CheckoutPage.css";
 
@@ -29,6 +30,7 @@ const CheckoutPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [phoneValidation, setPhoneValidation] = useState({ isValid: false });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -61,8 +63,8 @@ const CheckoutPage = () => {
         newErrors.email = "Please enter a valid email";
       if (!validators.required(formData.phone))
         newErrors.phone = "Phone number is required";
-      else if (!validators.phone(formData.phone))
-        newErrors.phone = "Please enter a valid phone number";
+      else if (!phoneValidation.isValid)
+        newErrors.phone = phoneValidation.error || "Please enter a valid phone number";
       if (!validators.required(formData.address))
         newErrors.address = "Address is required";
       if (!validators.required(formData.city))
@@ -241,17 +243,14 @@ const CheckoutPage = () => {
 
                   <div className="form-group full-width">
                     <label htmlFor="phone">Phone Number *</label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
+                    <PhoneInput
                       value={formData.phone}
-                      onChange={handleInputChange}
-                      className={errors.phone ? "error" : ""}
+                      onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+                      onValidationChange={setPhoneValidation}
+                      error={errors.phone}
+                      placeholder="Enter phone number"
+                      required
                     />
-                    {errors.phone && (
-                      <span className="error-message">{errors.phone}</span>
-                    )}
                   </div>
 
                   <div className="form-group full-width">

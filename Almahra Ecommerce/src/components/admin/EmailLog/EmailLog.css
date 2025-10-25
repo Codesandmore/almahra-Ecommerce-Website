@@ -154,6 +154,11 @@
   color: #e74c3c;
 }
 
+.type-contact {
+  background: rgba(52, 73, 94, 0.1);
+  color: #34495e;
+}
+
 .email-date {
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
