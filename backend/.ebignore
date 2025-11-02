@@ -1,0 +1,36 @@
+# Exclude virtual environments
+venv/
+.venv/
+
+# Node modules (if any)
+node_modules/
+
+# Git and editor metadata
+.git/
+.gitignore
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local files and uploads
+instance/
+uploads/
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Dependency caches
+pip-wheel-metadata/
+build/
+dist/
+
+# Ignore IDE and OS files
+*.idea/
+Thumbs.db
