@@ -25,6 +25,9 @@ def create_app(config_class=Config):
     mail.init_app(app)
     jwt.init_app(app)
     
+    # Import models so Flask-Migrate can detect them
+    from app.models import user, product, order
+    
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.products import products_bp
@@ -33,7 +36,7 @@ def create_app(config_class=Config):
     from app.routes.admin import admin_bp
     from app.routes.users import users_bp
     from app.routes.payments import payments_bp
-    from app.routes.ar_integration import ar_bp
+    # from app.routes.ar_integration import ar_bp  # Temporarily disabled due to CV2 import issues
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api/products')
@@ -42,7 +45,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(users_bp, url_prefix='/api/users')
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
-    app.register_blueprint(ar_bp, url_prefix='/api/ar')
+    # app.register_blueprint(ar_bp, url_prefix='/api/ar')  # Temporarily disabled
     
     # Health check endpoint
     @app.route('/health')

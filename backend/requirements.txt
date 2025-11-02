@@ -12,19 +12,19 @@ SQLAlchemy==2.0.23
 
 # Security
 bcrypt==4.1.2
-cryptography==41.0.8
+cryptography>=41.0.0
 python-dotenv==1.0.0
 
 # Payment Processing
-stripe==7.8.0
+stripe>=7.0.0
 
 # Validation
-marshmallow==3.20.1
-email-validator==2.1.0
+marshmallow>=3.20.0
+email-validator>=2.0.0
 
 # Image Processing (for AR integration)
-Pillow==10.1.0
-opencv-python==4.8.1.78
+Pillow>=10.0.0
+opencv-python>=4.8.0
 
 # HTTP Requests
 requests==2.31.0
