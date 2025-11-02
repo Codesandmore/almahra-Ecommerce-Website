@@ -92,3 +92,8 @@ storybook-static/
 
 # Optional REPL history
 .node_repl_history
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
