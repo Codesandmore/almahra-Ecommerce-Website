@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import adminService from '../../../services/adminService.js';
 import './AnalyticsDashboard.css';
 
 const AnalyticsDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
+  const [loading, setLoading] = useState(true);
+  const [analyticsData, setAnalyticsData] = useState({
+    revenue: { current: 0, previous: 0, change: 0 },
+    orders: { current: 0, previous: 0, change: 0 },
+    customers: { current: 0, previous: 0, change: 0 },
+    conversionRate: { current: 0, previous: 0, change: 0 }
+  });
+  const [topProducts, setTopProducts] = useState([]);
+  const [salesData, setSalesData] = useState([]);
 
   const periods = [
     { id: '7days', label: 'Last 7 Days' },
@@ -11,55 +21,58 @@ const AnalyticsDashboard = () => {
     { id: '1year', label: 'Last Year' }
   ];
 
-  const analyticsData = {
-    revenue: {
-      current: 125840,
-      previous: 112350,
-      change: 12.0
-    },
-    orders: {
-      current: 2184,
-      previous: 1950,
-      change: 12.0
-    },
-    customers: {
-      current: 1892,
-      previous: 1645,
-      change: 15.0
-    },
-    conversionRate: {
-      current: 3.2,
-      previous: 2.8,
-      change: 14.3
-    }
-  };
+  // Fetch analytics data from API
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getDashboard();
+        
+        if (response.metrics) {
+          // Map backend metrics to analytics format
+          setAnalyticsData({
+            revenue: {
+              current: response.metrics.total_revenue || 0,
+              previous: response.metrics.previous_revenue || 0,
+              change: response.metrics.revenue_change || 0
+            },
+            orders: {
+              current: response.metrics.total_orders || 0,
+              previous: response.metrics.previous_orders || 0,
+              change: response.metrics.orders_change || 0
+            },
+            customers: {
+              current: response.metrics.total_customers || 0,
+              previous: response.metrics.previous_customers || 0,
+              change: response.metrics.customers_change || 0
+            },
+            conversionRate: {
+              current: response.metrics.conversion_rate || 0,
+              previous: response.metrics.previous_conversion_rate || 0,
+              change: response.metrics.conversion_change || 0
+            }
+          });
 
-  const topProducts = [
-    { name: 'Ray-Ban Aviator Classic', sales: 156, revenue: 132000 },
-    { name: 'Oakley Holbrook', sales: 124, revenue: 148800 },
-    { name: 'Maui Jim Peahi', sales: 98, revenue: 151900 },
-    { name: 'Persol PO3019S', sales: 87, revenue: 85260 },
-    { name: 'Tom Ford Henry', sales: 65, revenue: 143000 }
-  ];
+          // Set top products if available
+          if (response.top_products) {
+            setTopProducts(response.top_products);
+          }
 
-  const salesData = [
-    { day: 'Mon', sales: 12000 },
-    { day: 'Tue', sales: 15000 },
-    { day: 'Wed', sales: 8000 },
-    { day: 'Thu', sales: 22000 },
-    { day: 'Fri', sales: 18000 },
-    { day: 'Sat', sales: 25000 },
-    { day: 'Sun', sales: 20000 }
-  ];
+          // Set sales data if available
+          if (response.sales_chart) {
+            setSalesData(response.sales_chart);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching analytics:', err);
+        // Keep default values on error
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const maxSales = Math.max(...salesData.map(d => d.sales));
-
-  const customerMetrics = [
-    { label: 'New Customers', value: 156, change: 8.2, trend: 'up' },
-    { label: 'Returning Customers', value: 324, change: 12.5, trend: 'up' },
-    { label: 'Customer Lifetime Value', value: '₹23,540', change: 5.8, trend: 'up' },
-    { label: 'Average Order Value', value: '₹8,760', change: -2.1, trend: 'down' }
-  ];
+    fetchAnalytics();
+  }, [selectedPeriod]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -72,6 +85,14 @@ const AnalyticsDashboard = () => {
   const getChangeClass = (change) => {
     return change >= 0 ? 'change--positive' : 'change--negative';
   };
+
+  // Customer metrics (will be populated from API later)
+  const customerMetrics = [
+    { label: 'New Customers', value: analyticsData.customers.current || 0, change: analyticsData.customers.change || 0, trend: analyticsData.customers.change >= 0 ? 'up' : 'down' },
+    { label: 'Total Orders', value: analyticsData.orders.current || 0, change: analyticsData.orders.change || 0, trend: analyticsData.orders.change >= 0 ? 'up' : 'down' },
+    { label: 'Total Revenue', value: formatCurrency(analyticsData.revenue.current || 0), change: analyticsData.revenue.change || 0, trend: analyticsData.revenue.change >= 0 ? 'up' : 'down' },
+    { label: 'Conversion Rate', value: `${analyticsData.conversionRate.current || 0}%`, change: analyticsData.conversionRate.change || 0, trend: analyticsData.conversionRate.change >= 0 ? 'up' : 'down' }
+  ];
 
   return (
     <div className="analytics-dashboard">
@@ -90,8 +111,14 @@ const AnalyticsDashboard = () => {
         </select>
       </div>
 
-      {/* Key Metrics */}
-      <div className="metrics-grid">
+      {loading ? (
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+          <p>Loading analytics...</p>
+        </div>
+      ) : (
+        <>
+          {/* Key Metrics */}
+          <div className="metrics-grid">
         <div className="metric-card">
           <div className="metric-card__header">
             <h3 className="metric-card__title">Total Revenue</h3>
@@ -161,20 +188,29 @@ const AnalyticsDashboard = () => {
             <h2 className="analytics-card__title">Sales Overview</h2>
           </div>
           <div className="analytics-card__content">
-            <div className="sales-chart">
-              {salesData.map((data, index) => (
-                <div key={index} className="sales-chart__item">
-                  <div 
-                    className="sales-chart__bar"
-                    style={{ height: `${(data.sales / maxSales) * 100}%` }}
-                  />
-                  <div className="sales-chart__value">
-                    {formatCurrency(data.sales)}
-                  </div>
-                  <div className="sales-chart__label">{data.day}</div>
-                </div>
-              ))}
-            </div>
+            {salesData.length > 0 ? (
+              <div className="sales-chart">
+                {salesData.map((data, index) => {
+                  const maxSales = Math.max(...salesData.map(d => d.sales || 0));
+                  return (
+                    <div key={index} className="sales-chart__item">
+                      <div 
+                        className="sales-chart__bar"
+                        style={{ height: `${maxSales > 0 ? (data.sales / maxSales) * 100 : 0}%` }}
+                      />
+                      <div className="sales-chart__value">
+                        {formatCurrency(data.sales || 0)}
+                      </div>
+                      <div className="sales-chart__label">{data.day || data.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>
+                <p>No sales data available yet</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -184,25 +220,34 @@ const AnalyticsDashboard = () => {
             <h2 className="analytics-card__title">Top Products</h2>
           </div>
           <div className="analytics-card__content">
-            <div className="top-products">
-              {topProducts.map((product, index) => (
-                <div key={index} className="product-item">
-                  <div className="product-item__rank">#{index + 1}</div>
-                  <div className="product-item__details">
-                    <div className="product-item__name">{product.name}</div>
-                    <div className="product-item__stats">
-                      {product.sales} sales • {formatCurrency(product.revenue)}
+            {topProducts.length > 0 ? (
+              <div className="top-products">
+                {topProducts.map((product, index) => {
+                  const maxRevenue = Math.max(...topProducts.map(p => p.revenue || 0));
+                  return (
+                    <div key={index} className="product-item">
+                      <div className="product-item__rank">#{index + 1}</div>
+                      <div className="product-item__details">
+                        <div className="product-item__name">{product.name}</div>
+                        <div className="product-item__stats">
+                          {product.sales || 0} sales • {formatCurrency(product.revenue || 0)}
+                        </div>
+                      </div>
+                      <div className="product-item__progress">
+                        <div 
+                          className="product-item__progress-bar"
+                          style={{ width: `${maxRevenue > 0 ? (product.revenue / maxRevenue) * 100 : 0}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="product-item__progress">
-                    <div 
-                      className="product-item__progress-bar"
-                      style={{ width: `${(product.revenue / 151900) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>
+                <p>No product data available yet</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -245,6 +290,8 @@ const AnalyticsDashboard = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

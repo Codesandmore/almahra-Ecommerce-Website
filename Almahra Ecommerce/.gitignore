@@ -1,3 +1,11 @@
+# ==================================================
+# GIT IGNORE - FRONTEND
+# ==================================================
+# IMPORTANT: .env.development is INCLUDED in Git for team development
+# It contains shared development configuration
+# .env.production is EXCLUDED for security
+# ==================================================
+
 # Logs
 logs
 *.log
@@ -32,6 +40,7 @@ build/
 
 # Environment variables
 .env
+# .env.development  # Included in repo for team development
 .env.local
 .env.development.local
 .env.test.local

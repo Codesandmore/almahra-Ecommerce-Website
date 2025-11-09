@@ -104,6 +104,13 @@ def login():
     # Find user by email
     user = User.query.filter_by(email=email).first()
     
+    # Debug logging
+    current_app.logger.info(f"Login attempt - Email: {email}, User found: {user is not None}")
+    if user:
+        password_check = user.check_password(password)
+        current_app.logger.info(f"Password check result: {password_check}")
+        current_app.logger.info(f"User role: {user.role}")
+    
     if not user or not user.check_password(password):
         return jsonify({'error': 'Invalid email or password'}), 401
     

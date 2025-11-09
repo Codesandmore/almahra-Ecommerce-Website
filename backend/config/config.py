@@ -45,7 +45,7 @@ class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'postgresql://postgres:password@localhost/almahra_ecommerce_dev'
+        'postgresql://username:password@localhost/almahra_ecommerce'
 
 class ProductionConfig(Config):
     """Production configuration"""

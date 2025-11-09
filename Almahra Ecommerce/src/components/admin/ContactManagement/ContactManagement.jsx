@@ -125,7 +125,6 @@ const ContactManagement = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <span className="search-icon">🔍</span>
         </div>
       </div>
 

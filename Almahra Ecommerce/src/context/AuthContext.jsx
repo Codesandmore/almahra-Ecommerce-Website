@@ -1,7 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import emailService from '../services/emailService';
+import authService from '../services/authService';
+import userService from '../services/userService';
 
 const AuthContext = createContext();
+
+// Helper function to convert snake_case to camelCase
+const toCamelCase = (obj) => {
+  if (!obj || typeof obj !== 'object') return obj;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  }
+  
+  const camelObj = {};
+  Object.keys(obj).forEach(key => {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    camelObj[camelKey] = toCamelCase(obj[key]);
+  });
+  
+  return camelObj;
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -15,122 +33,85 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on app start
+  // Load user from token on app start
   useEffect(() => {
-    const savedUser = localStorage.getItem('almahra_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('almahra_user');
+    const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const userData = authService.getCurrentUser();
+          // Convert snake_case to camelCase
+          setUser(toCamelCase(userData));
+        } catch (error) {
+          console.error('Error loading user:', error);
+          localStorage.removeItem('token');
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    };
+    
+    loadUser();
   }, []);
-
-  // Save user to localStorage whenever user changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('almahra_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('almahra_user');
-    }
-  }, [user]);
 
   const register = async (userData) => {
     try {
-      // In a real app, this would be an API call
-      const newUser = {
-        id: Date.now().toString(),
+      // Transform form data to match API requirements
+      const apiData = {
         email: userData.email,
-        password: userData.password, // Store password (in production, this should be hashed)
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        phone: userData.phone || '',
-        dateOfBirth: userData.dateOfBirth || '',
-        gender: userData.gender || '',
-        createdAt: new Date().toISOString(),
-        addresses: [],
-        orders: [],
-        wishlist: []
+        password: userData.password,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        phone: userData.phone || ''
       };
 
-      // Check if user already exists (simulate API validation)
-      const existingUsers = JSON.parse(localStorage.getItem('almahra_users') || '[]');
-      const emailExists = existingUsers.find(u => u.email.toLowerCase() === userData.email.toLowerCase());
+      const response = await authService.register(apiData);
       
-      if (emailExists) {
-        throw new Error('User with this email already exists');
-      }
-
-      // Check if phone number already exists
-      if (userData.phone) {
-        const cleanNewPhone = userData.phone.replace(/[\s\-()]/g, '');
-        const phoneExists = existingUsers.find(u => {
-          const cleanUserPhone = u.phone ? u.phone.replace(/[\s\-()]/g, '') : '';
-          return cleanUserPhone === cleanNewPhone;
-        });
-        
-        if (phoneExists) {
-          throw new Error('User with this phone number already exists');
-        }
-      }
-
-      // Save to users list
-      existingUsers.push(newUser);
-      localStorage.setItem('almahra_users', JSON.stringify(existingUsers));
-
-      setUser(newUser);
+      // Set user from response (token is automatically stored by authService)
+      // Convert snake_case to camelCase
+      setUser(toCamelCase(response.user));
       
-      // Send welcome email
-      await emailService.sendWelcomeEmail(newUser);
-      
-      return { success: true, user: newUser };
+      return { success: true, user: toCamelCase(response.user) };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Registration error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.message || 'Registration failed'
+      };
     }
   };
 
   const login = async (emailOrPhone, password) => {
     try {
-      // In a real app, this would be an API call with proper password verification
-      const existingUsers = JSON.parse(localStorage.getItem('almahra_users') || '[]');
-      
-      // Check if input is email or phone
-      const isEmail = emailOrPhone.includes('@');
-      let foundUser;
-      
-      if (isEmail) {
-        foundUser = existingUsers.find(u => u.email.toLowerCase() === emailOrPhone.toLowerCase());
-      } else {
-        // Clean phone number for comparison (remove spaces, dashes, etc.)
-        const cleanInput = emailOrPhone.replace(/[\s\-()]/g, '');
-        foundUser = existingUsers.find(u => {
-          const cleanUserPhone = u.phone ? u.phone.replace(/[\s\-()]/g, '') : '';
-          return cleanUserPhone === cleanInput;
-        });
-      }
-      
-      if (!foundUser) {
-        throw new Error('No account found with this ' + (isEmail ? 'email' : 'phone number'));
-      }
+      // API expects 'email' field (backend should handle both email and phone)
+      const credentials = {
+        email: emailOrPhone, // Backend will check if it's email or phone
+        password: password
+      };
 
-      // Verify password
-      // In a real app, you'd verify the password hash
-      if (!password || password !== foundUser.password) {
-        throw new Error('Invalid password');
-      }
-
-      setUser(foundUser);
-      return { success: true, user: foundUser };
+      const response = await authService.login(credentials);
+      
+      // Set user from response (token is automatically stored by authService)
+      // Convert snake_case to camelCase
+      setUser(toCamelCase(response.user));
+      
+      return { success: true, user: toCamelCase(response.user) };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.message || 'Login failed'
+      };
     }
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+    }
   };
 
   const updateUser = async (updates) => {
@@ -139,21 +120,23 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No user logged in');
       }
 
-      const updatedUser = { ...user, ...updates };
-      
-      // Update in users list
-      const existingUsers = JSON.parse(localStorage.getItem('almahra_users') || '[]');
-      const userIndex = existingUsers.findIndex(u => u.id === user.id);
-      
-      if (userIndex !== -1) {
-        existingUsers[userIndex] = updatedUser;
-        localStorage.setItem('almahra_users', JSON.stringify(existingUsers));
-      }
+      // Transform updates to match API format (camelCase to snake_case)
+      const apiUpdates = {};
+      if (updates.firstName) apiUpdates.first_name = updates.firstName;
+      if (updates.lastName) apiUpdates.last_name = updates.lastName;
+      if (updates.phone) apiUpdates.phone = updates.phone;
+      if (updates.dateOfBirth) apiUpdates.date_of_birth = updates.dateOfBirth;
 
+      const updatedUser = await userService.updateProfile(apiUpdates);
       setUser(updatedUser);
+      
       return { success: true, user: updatedUser };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Update user error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.message || 'Update failed'
+      };
     }
   };
 
@@ -163,16 +146,38 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No user logged in');
       }
 
-      const newAddress = {
-        id: Date.now().toString(),
-        ...address,
-        createdAt: new Date().toISOString()
+      // Transform address to match API format
+      const apiAddress = {
+        type: address.type || 'shipping',
+        first_name: address.firstName,
+        last_name: address.lastName,
+        company: address.company || '',
+        address_line_1: address.addressLine1,
+        address_line_2: address.addressLine2 || '',
+        city: address.city,
+        state: address.state,
+        postal_code: address.postalCode,
+        country: address.country,
+        phone: address.phone || '',
+        is_default: address.isDefault || false
       };
 
-      const updatedAddresses = [...(user.addresses || []), newAddress];
-      return await updateUser({ addresses: updatedAddresses });
+      const newAddress = await userService.addAddress(apiAddress);
+      
+      // Update user's addresses in state
+      const updatedUser = {
+        ...user,
+        addresses: [...(user.addresses || []), newAddress]
+      };
+      setUser(updatedUser);
+      
+      return { success: true, address: newAddress };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Add address error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.message || 'Failed to add address'
+      };
     }
   };
 
@@ -182,13 +187,36 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No user logged in');
       }
 
-      const updatedAddresses = user.addresses.map(addr => 
-        addr.id === addressId ? { ...addr, ...updates } : addr
-      );
+      // Transform updates to match API format
+      const apiUpdates = {};
+      if (updates.firstName) apiUpdates.first_name = updates.firstName;
+      if (updates.lastName) apiUpdates.last_name = updates.lastName;
+      if (updates.company !== undefined) apiUpdates.company = updates.company;
+      if (updates.addressLine1) apiUpdates.address_line_1 = updates.addressLine1;
+      if (updates.addressLine2 !== undefined) apiUpdates.address_line_2 = updates.addressLine2;
+      if (updates.city) apiUpdates.city = updates.city;
+      if (updates.state) apiUpdates.state = updates.state;
+      if (updates.postalCode) apiUpdates.postal_code = updates.postalCode;
+      if (updates.country) apiUpdates.country = updates.country;
+      if (updates.phone !== undefined) apiUpdates.phone = updates.phone;
+      if (updates.isDefault !== undefined) apiUpdates.is_default = updates.isDefault;
+
+      const updatedAddress = await userService.updateAddress(addressId, apiUpdates);
       
-      return await updateUser({ addresses: updatedAddresses });
+      // Update user's addresses in state
+      const updatedAddresses = user.addresses.map(addr => 
+        addr.id === addressId ? updatedAddress : addr
+      );
+      const updatedUser = { ...user, addresses: updatedAddresses };
+      setUser(updatedUser);
+      
+      return { success: true, address: updatedAddress };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Update address error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.message || 'Failed to update address'
+      };
     }
   };
 
@@ -198,10 +226,20 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No user logged in');
       }
 
+      await userService.deleteAddress(addressId);
+      
+      // Update user's addresses in state
       const updatedAddresses = user.addresses.filter(addr => addr.id !== addressId);
-      return await updateUser({ addresses: updatedAddresses });
+      const updatedUser = { ...user, addresses: updatedAddresses };
+      setUser(updatedUser);
+      
+      return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Delete address error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.message || 'Failed to delete address'
+      };
     }
   };
 

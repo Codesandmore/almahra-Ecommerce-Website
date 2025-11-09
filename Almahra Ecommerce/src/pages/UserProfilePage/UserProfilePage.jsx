@@ -7,19 +7,47 @@ import PersonalInfo from '../../components/user/PersonalInfo/PersonalInfo.jsx';
 import OrderHistory from '../../components/user/OrderHistory/OrderHistory.jsx';
 import AddressBook from '../../components/user/AddressBook/AddressBook.jsx';
 import MyAppointments from '../../components/user/MyAppointments/MyAppointments.jsx';
-import { 
-  mockUserOrders, 
-  mockWishlist 
-} from '../../data/mockData.js';
+import orderService from '../../services/orderService.js';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
   const [activeTab, setActiveTab] = useState('personal-info');
-  const [orders] = useState(mockUserOrders);
-  const [wishlist] = useState(mockWishlist);
+  const [orders, setOrders] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   const { user, isAuthenticated, updateUser, addAddress, updateAddress, deleteAddress } = useAuth();
   const navigate = useNavigate();
+
+  // Fetch user orders and wishlist
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!isAuthenticated) {
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        // Fetch orders
+        const ordersResponse = await orderService.getUserOrders();
+        setOrders(ordersResponse.orders || []);
+        
+        // TODO: Implement wishlist API
+        // const wishlistResponse = await wishlistService.getWishlist();
+        // setWishlist(wishlistResponse.items || []);
+        setWishlist([]); // Empty for now
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        // Don't show error, just use empty arrays
+        setOrders([]);
+        setWishlist([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [isAuthenticated]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -29,7 +57,7 @@ const UserProfilePage = () => {
   }, [isAuthenticated, navigate]);
 
   // Show loading or redirect if no user
-  if (!user) {
+  if (!user || loading) {
     return (
       <div className="user-profile-page">
         <div className="profile-loading">

@@ -1,11 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import adminService from '../../../services/adminService.js';
 import './DashboardOverview.css';
 
-const DashboardOverview = () => {
-  const stats = [
+const DashboardOverview = ({ setActiveTab }) => {
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    orders: 0,
+    products: 0,
+    customers: 0
+  });
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch dashboard data from API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getDashboard();
+        
+        // Map backend metrics to frontend stats
+        if (response.metrics) {
+          setStats({
+            totalSales: response.metrics.total_revenue || 0,
+            orders: response.metrics.total_orders || 0,
+            products: response.metrics.total_products || 0,
+            customers: response.metrics.total_customers || 0
+          });
+        }
+        
+        setRecentOrders(response.recent_orders || []);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        // Keep default values on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const statsDisplay = [
     {
       title: 'Total Sales',
-      value: '₹1,25,840',
+      value: `₹${stats.totalSales.toLocaleString()}`,
       change: '+12.5%',
       trend: 'up',
       icon: (
@@ -17,7 +56,7 @@ const DashboardOverview = () => {
     },
     {
       title: 'Orders',
-      value: '2,184',
+      value: stats.orders.toString(),
       change: '+8.2%',
       trend: 'up',
       icon: (
@@ -29,7 +68,7 @@ const DashboardOverview = () => {
     },
     {
       title: 'Products',
-      value: '342',
+      value: stats.products.toString(),
       change: '+3.1%',
       trend: 'up',
       icon: (
@@ -43,7 +82,7 @@ const DashboardOverview = () => {
     },
     {
       title: 'Customers',
-      value: '1,892',
+      value: stats.customers.toString(),
       change: '+15.3%',
       trend: 'up',
       icon: (
@@ -54,41 +93,6 @@ const DashboardOverview = () => {
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       )
-    }
-  ];
-
-  const recentOrders = [
-    {
-      id: '#ORD-001',
-      customer: 'John Doe',
-      product: 'Ray-Ban Aviator',
-      amount: '₹8,500',
-      status: 'pending',
-      date: '2025-09-11'
-    },
-    {
-      id: '#ORD-002',
-      customer: 'Jane Smith',
-      product: 'Oakley Holbrook',
-      amount: '₹12,000',
-      status: 'completed',
-      date: '2025-09-11'
-    },
-    {
-      id: '#ORD-003',
-      customer: 'Mike Johnson',
-      product: 'Maui Jim Peahi',
-      amount: '₹15,500',
-      status: 'processing',
-      date: '2025-09-10'
-    },
-    {
-      id: '#ORD-004',
-      customer: 'Sarah Wilson',
-      product: 'Persol PO3019S',
-      amount: '₹9,800',
-      status: 'completed',
-      date: '2025-09-10'
     }
   ];
 
@@ -105,6 +109,17 @@ const DashboardOverview = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="dashboard-overview">
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-overview">
       <div className="dashboard-header">
@@ -114,7 +129,7 @@ const DashboardOverview = () => {
 
       {/* Stats Grid */}
       <div className="stats-grid">
-        {stats.map((stat, index) => (
+        {statsDisplay.map((stat, index) => (
           <div key={index} className="stat-card">
             <div className="stat-card__header">
               <div className="stat-card__icon">
@@ -173,7 +188,7 @@ const DashboardOverview = () => {
           </div>
           <div className="dashboard-card__content">
             <div className="quick-actions">
-              <button className="quick-action">
+              <button className="quick-action" onClick={() => setActiveTab('products')}>
                 <div className="quick-action__icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -183,7 +198,7 @@ const DashboardOverview = () => {
                 </div>
                 <span>Add Product</span>
               </button>
-              <button className="quick-action">
+              <button className="quick-action" onClick={() => setActiveTab('users')}>
                 <div className="quick-action__icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -194,7 +209,7 @@ const DashboardOverview = () => {
                 </div>
                 <span>View Customers</span>
               </button>
-              <button className="quick-action">
+              <button className="quick-action" onClick={() => setActiveTab('analytics')}>
                 <div className="quick-action__icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
@@ -202,7 +217,7 @@ const DashboardOverview = () => {
                 </div>
                 <span>View Analytics</span>
               </button>
-              <button className="quick-action">
+              <button className="quick-action" onClick={() => setActiveTab('products')}>
                 <div className="quick-action__icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>

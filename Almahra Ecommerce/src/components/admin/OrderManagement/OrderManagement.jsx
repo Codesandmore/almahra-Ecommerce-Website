@@ -1,66 +1,39 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import orderService from '../../../services/orderService.js';
 import './OrderManagement.css';
 
 const OrderManagement = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' for ascending, 'desc' for descending
-  
-  // Debug: Log component load and CSS
-  console.log('OrderManagement component loaded');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const orders = [
-    {
-      id: 'ORD-001',
-      customer: 'John Doe',
-      email: 'john@example.com',
-      products: ['Ray-Ban Aviator', 'Lens Cleaner'],
-      total: 8500,
-      status: 'pending',
-      date: '2025-09-11',
-      address: '123 Main St, New Delhi, India'
-    },
-    {
-      id: 'ORD-002',
-      customer: 'Jane Smith',
-      email: 'jane@example.com',
-      products: ['Oakley Holbrook'],
-      total: 12000,
-      status: 'completed',
-      date: '2025-09-11',
-      address: '456 Park Ave, Mumbai, India'
-    },
-    {
-      id: 'ORD-003',
-      customer: 'Mike Johnson',
-      email: 'mike@example.com',
-      products: ['Maui Jim Peahi', 'Protective Case'],
-      total: 15500,
-      status: 'processing',
-      date: '2025-09-10',
-      address: '789 Oak Rd, Bangalore, India'
-    },
-    {
-      id: 'ORD-004',
-      customer: 'Sarah Wilson',
-      email: 'sarah@example.com',
-      products: ['Persol PO3019S'],
-      total: 9800,
-      status: 'completed',
-      date: '2025-09-10',
-      address: '321 Pine St, Chennai, India'
-    },
-    {
-      id: 'ORD-005',
-      customer: 'David Brown',
-      email: 'david@example.com',
-      products: ['Tom Ford Henry', 'Blue Light Filter'],
-      total: 22000,
-      status: 'cancelled',
-      date: '2025-09-09',
-      address: '654 Elm St, Kolkata, India'
-    }
-  ];
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const response = await orderService.getAllOrders();
+        setOrders(response.orders || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+        // Only show error for server errors, not empty data
+        if (err.response && err.response.status >= 500) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError(null);
+        }
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const tabs = [
     { id: 'all', label: 'All Orders', count: orders.length },
@@ -93,7 +66,7 @@ const OrderManagement = () => {
     });
     
     return filtered;
-  }, [selectedTab, searchTerm, sortOrder]);
+  }, [orders, selectedTab, searchTerm, sortOrder]);
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -118,6 +91,29 @@ const OrderManagement = () => {
     console.log(`Viewing order ${orderId}`);
   };
 
+  if (loading) {
+    return (
+      <div className="order-management">
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="order-management">
+        <div className="error-state">
+          <h2>Error Loading Orders</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="order-management">
       <div className="order-management__header">
@@ -138,10 +134,6 @@ const OrderManagement = () => {
       <div className="order-controls">
         <div className="search-controls">
           <div className="search-box">
-            <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
             <input
               type="text"
               placeholder="Search by customer name, email or order ID..."
@@ -201,7 +193,8 @@ const OrderManagement = () => {
           </div>
         )}
         
-        {filteredAndSortedOrders.map(order => (
+        {filteredAndSortedOrders.length > 0 ? (
+          filteredAndSortedOrders.map(order => (
           <div key={order.id} className="order-card">
             <div className="order-card__header">
               <div className="order-card__id">
@@ -257,23 +250,24 @@ const OrderManagement = () => {
               </select>
             </div>
           </div>
-        ))}
-      </div>
-
-      {filteredAndSortedOrders.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-state__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-            </svg>
+          ))
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state__icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </div>
+            <h3 className="empty-state__title">No orders found</h3>
+            <p className="empty-state__message">
+              {orders.length === 0 
+                ? "No orders have been placed yet. Orders will appear here once customers make purchases." 
+                : "No orders match the current filter criteria. Try adjusting your search or filters."}
+            </p>
           </div>
-          <h3 className="empty-state__title">No orders found</h3>
-          <p className="empty-state__message">
-            No orders match the current filter criteria.
-          </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

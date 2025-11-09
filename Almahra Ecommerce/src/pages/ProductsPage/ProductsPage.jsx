@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ProductCard from '../../components/product/ProductCard/ProductCard.jsx';
-import { products, frameTypes, frameShapes, materials } from '../../data/mockData.js';
+import productService from '../../services/productService.js';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
@@ -12,6 +12,41 @@ const ProductsPage = () => {
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
+  
+  // State for products from API
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Filter options - Lenskart exact options
+  const frameTypes = ['Full Rim', 'Half Rim', 'Rimless'];
+  const frameShapes = ['Rectangle', 'Round', 'Square', 'Oval', 'Cat-Eye', 'Aviator', 'Wayfarer', 'Clubmaster', 'Geometric'];
+  const materials = ['Acetate', 'Metal', 'Stainless Steel', 'Titanium', 'TR-90', 'Plastic', 'Wood', 'Mixed Material'];
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await productService.getAllProducts();
+        setProducts(response.products || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        // Only show error if it's a real API error, not just empty data
+        if (err.response && err.response.status !== 404) {
+          setError('Failed to connect to server. Please try again.');
+        } else {
+          setError(null);
+        }
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Initialize filters from URL parameters
   useEffect(() => {
@@ -46,6 +81,31 @@ const ProductsPage = () => {
     setSelectedMaterial('all');
     setCurrentPage(1);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="products-page">
+        <div className="products-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="products-page">
+        <div className="products-error">
+          <h2>Error Loading Products</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="products-page">
@@ -195,11 +255,28 @@ const ProductsPage = () => {
         {/* Right Products Grid */}
         <main className="products-main">
           <div className="products-grid">
-            {currentProducts.map(product => (
-              <div key={product.id} className="product-grid-item">
-                <ProductCard product={product} />
+            {currentProducts.length > 0 ? (
+              currentProducts.map(product => (
+                <div key={product.id} className="product-grid-item">
+                  <ProductCard product={product} />
+                </div>
+              ))
+            ) : (
+              <div className="no-products">
+                <div className="no-products-icon">📦</div>
+                <h3>No Products Found</h3>
+                <p>
+                  {products.length === 0 
+                    ? "We're adding new products soon. Check back later!" 
+                    : "No products match your filters. Try adjusting your search criteria."}
+                </p>
+                {filteredProducts.length === 0 && products.length > 0 && (
+                  <button onClick={clearFilters} className="btn btn--primary">
+                    Clear Filters
+                  </button>
+                )}
               </div>
-            ))}
+            )}
           </div>
 
           {/* Pagination */}
