@@ -21,12 +21,17 @@ def create_app(config_class=Config):
     # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
-    cors.init_app(app, origins=["http://localhost:3000", "http://localhost:5173"])
+    cors.init_app(app, 
+                  origins=["http://localhost:3000", "http://localhost:5173"],
+                  supports_credentials=True,
+                  allow_headers=["Content-Type", "Authorization"],
+                  methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
     mail.init_app(app)
     jwt.init_app(app)
     
     # Import models so Flask-Migrate can detect them
-    from app.models import user, product, order
+    with app.app_context():
+        from app.models import user, product, order
     
     # Register blueprints
     from app.routes.auth import auth_bp

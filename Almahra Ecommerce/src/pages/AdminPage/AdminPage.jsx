@@ -16,7 +16,7 @@ const AdminPage = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardOverview />;
+        return <DashboardOverview setActiveTab={setActiveTab} />;
       case 'products':
         return <ProductManagement />;
       case 'orders':
@@ -30,7 +30,7 @@ const AdminPage = () => {
       case 'contact':
         return <ContactManagement />;
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview setActiveTab={setActiveTab} />;
     }
   };
 

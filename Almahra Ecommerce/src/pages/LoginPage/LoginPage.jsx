@@ -300,6 +300,12 @@ const LoginPage = () => {
               {isLogin ? 'Create one' : 'Sign in'}
             </button>
           </p>
+          
+          {isLogin && (
+            <p className="admin-login-text">
+              Are you an admin? <Link to="/admin/login" className="admin-login-link">Sign in here</Link>
+            </p>
+          )}
         </div>
       </div>
     </div>

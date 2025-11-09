@@ -45,14 +45,14 @@
 }
 
 .filter-tab:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: #3498db;
+  color: #3498db;
 }
 
 .filter-tab--active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
   color: white;
-  border-color: #667eea;
+  border-color: #3498db;
 }
 
 .search-box {
@@ -71,7 +71,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #3498db;
 }
 
 .search-icon {
@@ -110,12 +110,12 @@
 }
 
 .query-card:hover {
-  border-color: #667eea;
+  border-color: #3498db;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .query-card--active {
-  border-color: #667eea;
+  border-color: #3498db;
   background: #f8f9ff;
 }
 
@@ -256,7 +256,7 @@
 }
 
 .detail-row a {
-  color: #667eea;
+  color: #3498db;
   text-decoration: none;
 }
 
@@ -275,7 +275,7 @@
   background: #f8f9fa;
   padding: 20px;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #3498db;
   line-height: 1.6;
   color: #555;
   white-space: pre-wrap;
@@ -352,7 +352,7 @@
 }
 
 .action-btn--primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
   color: white;
 }
 

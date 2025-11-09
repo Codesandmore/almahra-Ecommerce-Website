@@ -9,6 +9,7 @@ import ProductsPage from "./pages/ProductsPage/ProductsPage.jsx";
 import CartPage from "./pages/CartPage/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage/CheckoutPage.jsx";
 import AdminPage from "./pages/AdminPage/AdminPage.jsx";
+import AdminLoginPage from "./pages/AdminLoginPage/AdminLoginPage.jsx";
 import UserProfilePage from "./pages/UserProfilePage/UserProfilePage.jsx";
 import LoginPage from "./pages/LoginPage/LoginPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage.jsx";
@@ -27,6 +28,7 @@ function App() {
           <Router>
         <div className="app">
           <Routes>
+            <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin/*" element={<AdminPage />} />
             <Route path="*" element={
               <>

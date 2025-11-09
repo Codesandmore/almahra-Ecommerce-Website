@@ -3,11 +3,85 @@ from sqlalchemy import or_, and_, func
 from app.models import db, Product, Category, Brand, ProductImage, Review
 from app.utils.validators import validate_pagination_params, sanitize_search_query
 from app.utils.auth import admin_required, get_current_user
+from datetime import datetime
 import json
 
 products_bp = Blueprint('products', __name__)
 
-@products_bp.route('', methods=['GET'])
+@products_bp.route('', methods=['GET', 'POST'])
+def products():
+    """Get all products or create a new product"""
+    if request.method == 'POST':
+        return create_product()
+    return get_products()
+
+def create_product():
+    """Create a new product (Admin only)"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['name', 'price']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'error': f'{field} is required'}), 400
+        
+        # Generate SKU and slug
+        import re
+        slug_base = re.sub(r'[^a-z0-9]+', '-', data['name'].lower()).strip('-')
+        sku_base = re.sub(r'[^A-Z0-9]+', '', data['name'].upper())[:10]
+        
+        # Ensure unique slug and SKU
+        slug = slug_base
+        sku = f"{sku_base}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
+        counter = 1
+        while Product.query.filter_by(slug=slug).first():
+            slug = f"{slug_base}-{counter}"
+            counter += 1
+        
+        # Get or create brand
+        brand = None
+        if data.get('brand'):
+            brand = Brand.query.filter_by(name=data['brand']).first()
+            if not brand:
+                brand_slug = re.sub(r'[^a-z0-9]+', '-', data['brand'].lower()).strip('-')
+                brand = Brand(
+                    name=data['brand'],
+                    slug=brand_slug
+                )
+                db.session.add(brand)
+                db.session.flush()
+        
+        # Create product
+        product = Product(
+            name=data['name'],
+            description=data.get('description', ''),
+            sku=sku,
+            slug=slug,
+            price=float(data['price']),
+            stock_quantity=int(data.get('stock', 0)),
+            brand_id=brand.id if brand else None,
+            material=data.get('material'),
+            frame_type=data.get('frameType'),
+            frame_shape=data.get('frameShape'),
+            is_active=True,
+            published_at=datetime.utcnow()
+        )
+        
+        db.session.add(product)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Product created successfully',
+            'product': product.to_dict()
+        }), 201
+    
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error creating product: {str(e)}")
+        return jsonify({'error': 'Failed to create product'}), 500
+
 def get_products():
     """Get products with filtering, searching, and pagination"""
     try:
@@ -20,7 +94,7 @@ def get_products():
         min_price = request.args.get('min_price', type=float)
         max_price = request.args.get('max_price', type=float)
         frame_type = request.args.get('frame_type', '').strip()
-        frame_style = request.args.get('frame_style', '').strip()
+        frame_shape = request.args.get('frame_shape', '').strip()
         color = request.args.get('color', '').strip()
         sort_by = request.args.get('sort_by', 'created_at')
         sort_order = request.args.get('sort_order', 'desc')
@@ -63,8 +137,8 @@ def get_products():
         # Apply product attribute filters
         if frame_type:
             query = query.filter(Product.frame_type == frame_type)
-        if frame_style:
-            query = query.filter(Product.frame_style == frame_style)
+        if frame_shape:
+            query = query.filter(Product.frame_shape == frame_shape)
         if color:
             query = query.filter(Product.color.ilike(f'%{color}%'))
         
@@ -134,7 +208,7 @@ def get_products():
                 'min_price': min_price,
                 'max_price': max_price,
                 'frame_type': frame_type,
-                'frame_style': frame_style,
+                'frame_shape': frame_shape,
                 'color': color,
                 'is_featured': is_featured,
                 'in_stock': in_stock
@@ -145,7 +219,15 @@ def get_products():
         current_app.logger.error(f"Error fetching products: {str(e)}")
         return jsonify({'error': 'Failed to fetch products'}), 500
 
-@products_bp.route('/<int:product_id>', methods=['GET'])
+@products_bp.route('/<int:product_id>', methods=['GET', 'PUT', 'DELETE'])
+def product_detail(product_id):
+    """Get, update, or delete a single product"""
+    if request.method == 'PUT':
+        return update_product(product_id)
+    elif request.method == 'DELETE':
+        return delete_product(product_id)
+    return get_product(product_id)
+
 def get_product(product_id):
     """Get single product by ID"""
     try:
@@ -154,11 +236,81 @@ def get_product(product_id):
         if not product:
             return jsonify({'error': 'Product not found'}), 404
         
-        return jsonify({'product': product.to_dict(include_details=True)}), 200
+        return jsonify({'product': product.to_dict(include_relations=True)}), 200
     
     except Exception as e:
         current_app.logger.error(f"Error fetching product {product_id}: {str(e)}")
         return jsonify({'error': 'Failed to fetch product'}), 500
+
+def update_product(product_id):
+    """Update a product (Admin only)"""
+    try:
+        product = Product.query.get(product_id)
+        
+        if not product:
+            return jsonify({'error': 'Product not found'}), 404
+        
+        data = request.get_json()
+        
+        # Update fields
+        if 'name' in data:
+            product.name = data['name']
+        if 'description' in data:
+            product.description = data['description']
+        if 'price' in data:
+            product.price = float(data['price'])
+        if 'stock' in data:
+            product.stock_quantity = int(data['stock'])
+        if 'material' in data:
+            product.material = data['material']
+        if 'frameType' in data:
+            product.frame_type = data['frameType']
+        if 'frameShape' in data:
+            product.frame_shape = data['frameShape']
+        
+        # Update brand if provided
+        if 'brand' in data and data['brand']:
+            brand = Brand.query.filter_by(name=data['brand']).first()
+            if not brand:
+                import re
+                brand_slug = re.sub(r'[^a-z0-9]+', '-', data['brand'].lower()).strip('-')
+                brand = Brand(name=data['brand'], slug=brand_slug)
+                db.session.add(brand)
+                db.session.flush()
+            product.brand_id = brand.id
+        
+        product.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Product updated successfully',
+            'product': product.to_dict()
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating product {product_id}: {str(e)}")
+        return jsonify({'error': 'Failed to update product'}), 500
+
+def delete_product(product_id):
+    """Delete a product (Admin only) - soft delete"""
+    try:
+        product = Product.query.get(product_id)
+        
+        if not product:
+            return jsonify({'error': 'Product not found'}), 404
+        
+        # Soft delete - just mark as inactive
+        product.is_active = False
+        product.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({'message': 'Product deleted successfully'}), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error deleting product {product_id}: {str(e)}")
+        return jsonify({'error': 'Failed to delete product'}), 500
 
 @products_bp.route('/slug/<slug>', methods=['GET'])
 def get_product_by_slug(slug):
@@ -362,11 +514,11 @@ def get_product_filters():
             )
         ).distinct().all()
         
-        # Get unique frame styles
-        frame_styles = db.session.query(Product.frame_style).filter(
+        # Get unique frame shapes
+        frame_shapes = db.session.query(Product.frame_shape).filter(
             and_(
                 Product.is_active == True,
-                Product.frame_style.isnot(None)
+                Product.frame_shape.isnot(None)
             )
         ).distinct().all()
         
@@ -386,7 +538,7 @@ def get_product_filters():
         
         return jsonify({
             'frame_types': [ft[0] for ft in frame_types if ft[0]],
-            'frame_styles': [fs[0] for fs in frame_styles if fs[0]],
+            'frame_shapes': [fs[0] for fs in frame_shapes if fs[0]],
             'colors': [color[0] for color in colors if color[0]],
             'price_range': {
                 'min': float(price_range.min_price) if price_range.min_price else 0,

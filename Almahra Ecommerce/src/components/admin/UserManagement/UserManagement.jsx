@@ -1,68 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../../common/Button/Button.jsx';
+import adminService from '../../../services/adminService.js';
 import './UserManagement.css';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const users = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'customer',
-      status: 'active',
-      joinDate: '2025-01-15',
-      totalOrders: 12,
-      totalSpent: 45000,
-      avatar: 'J'
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      role: 'customer',
-      status: 'active',
-      joinDate: '2025-02-20',
-      totalOrders: 8,
-      totalSpent: 32000,
-      avatar: 'J'
-    },
-    {
-      id: 3,
-      name: 'Mike Johnson',
-      email: 'mike@example.com',
-      role: 'customer',
-      status: 'inactive',
-      joinDate: '2025-03-10',
-      totalOrders: 3,
-      totalSpent: 15000,
-      avatar: 'M'
-    },
-    {
-      id: 4,
-      name: 'Sarah Wilson',
-      email: 'sarah@example.com',
-      role: 'admin',
-      status: 'active',
-      joinDate: '2024-12-01',
-      totalOrders: 0,
-      totalSpent: 0,
-      avatar: 'S'
-    },
-    {
-      id: 5,
-      name: 'David Brown',
-      email: 'david@example.com',
-      role: 'customer',
-      status: 'active',
-      joinDate: '2025-04-05',
-      totalOrders: 15,
-      totalSpent: 67000,
-      avatar: 'D'
-    }
-  ];
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getAllUsers();
+        setUsers(response.users || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        // Only show error for server errors, not empty data
+        if (err.response && err.response.status >= 500) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError(null);
+        }
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const roles = [
     { id: 'all', name: 'All Roles' },
@@ -71,9 +42,10 @@ const UserManagement = () => {
   ];
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+    const matchesSearch = userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
+    const matchesRole = selectedRole === 'all' || user.role?.toLowerCase() === selectedRole.toLowerCase();
     return matchesSearch && matchesRole;
   });
 
@@ -96,6 +68,29 @@ const UserManagement = () => {
   const handleToggleStatus = (userId) => {
     console.log('Toggle status for user:', userId);
   };
+
+  if (loading) {
+    return (
+      <div className="user-management">
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Loading users...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="user-management">
+        <div className="error-state">
+          <h2>Error Loading Users</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-management">
@@ -120,10 +115,6 @@ const UserManagement = () => {
       {/* Filters */}
       <div className="user-filters">
         <div className="search-box">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
           <input
             type="text"
             placeholder="Search users..."
@@ -148,38 +139,39 @@ const UserManagement = () => {
 
       {/* Users Grid */}
       <div className="users-grid">
-        {filteredUsers.map(user => (
+        {filteredUsers.length > 0 ? (
+          filteredUsers.map(user => (
           <div key={user.id} className="user-card">
             <div className="user-card__header">
               <div className="user-avatar">
-                {user.avatar}
+                {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="user-card__badges">
                 <span className={`role-badge ${getRoleClass(user.role)}`}>
                   {user.role}
                 </span>
-                <span className={`status-badge ${getStatusClass(user.status)}`}>
-                  {user.status}
+                <span className={`status-badge ${getStatusClass(user.isVerified ? 'active' : 'inactive')}`}>
+                  {user.isVerified ? 'verified' : 'unverified'}
                 </span>
               </div>
             </div>
 
             <div className="user-card__content">
-              <h3 className="user-card__name">{user.name}</h3>
+              <h3 className="user-card__name">{user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email}</h3>
               <p className="user-card__email">{user.email}</p>
               <p className="user-card__join-date">
-                Joined: {new Date(user.joinDate).toLocaleDateString()}
+                Joined: {new Date(user.createdAt || Date.now()).toLocaleDateString()}
               </p>
 
-              {user.role === 'customer' && (
+              {user.role === 'CUSTOMER' && (
                 <div className="user-card__stats">
                   <div className="user-stat-item">
-                    <span className="stat-value">{user.totalOrders}</span>
+                    <span className="stat-value">{user.totalOrders || 0}</span>
                     <span className="stat-label">Orders</span>
                   </div>
                   <div className="user-stat-item">
-                    <span className="stat-value">₹{user.totalSpent.toLocaleString()}</span>
-                    <span className="stat-label">Total Spent</span>
+                    <span className="stat-value">₹{user.totalSpent?.toLocaleString() || 0}</span>
+                    <span className="stat-label">Spent</span>
                   </div>
                 </div>
               )}
@@ -211,25 +203,26 @@ const UserManagement = () => {
               </Button>
             </div>
           </div>
-        ))}
-      </div>
-
-      {filteredUsers.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-state__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
+          ))
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state__icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3 className="empty-state__title">No users found</h3>
+            <p className="empty-state__message">
+              {users.length === 0 
+                ? "No users have registered yet. Users will appear here once they sign up." 
+                : "Try adjusting your search terms or filters to find what you're looking for."}
+            </p>
           </div>
-          <h3 className="empty-state__title">No users found</h3>
-          <p className="empty-state__message">
-            Try adjusting your search terms or filters to find what you're looking for.
-          </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

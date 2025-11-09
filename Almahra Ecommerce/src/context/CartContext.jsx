@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { storage } from "../utils/helpers.js";
+import cartService from "../services/cartService.js";
+import { useAuth } from "./AuthContext.jsx";
 
 // Initial state
 const getInitialState = () => {
@@ -150,35 +152,118 @@ const CartContext = createContext();
 // Cart provider component
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, getInitialState());
+  const { isAuthenticated } = useAuth();
+
+  // Load cart from backend when user logs in
+  useEffect(() => {
+    const loadCart = async () => {
+      if (isAuthenticated) {
+        try {
+          const cartData = await cartService.getCart();
+          if (cartData && cartData.items) {
+            // Update state with backend cart
+            dispatch({ type: CART_ACTIONS.CLEAR_CART });
+            cartData.items.forEach(item => {
+              dispatch({
+                type: CART_ACTIONS.ADD_ITEM,
+                payload: {
+                  product: item.product,
+                  variant: item.variant,
+                  quantity: item.quantity
+                }
+              });
+            });
+          }
+        } catch (err) {
+          console.error('Error loading cart from backend:', err);
+        }
+      }
+    };
+
+    loadCart();
+  }, [isAuthenticated]);
 
   // Save cart to localStorage whenever state changes
   useEffect(() => {
     storage.set("cart", state);
   }, [state]);
 
-  const addToCart = (product, variant = null, quantity = 1) => {
+  const addToCart = async (product, variant = null, quantity = 1) => {
+    // Update local state immediately
     dispatch({
       type: CART_ACTIONS.ADD_ITEM,
       payload: { product, variant, quantity },
     });
+
+    // Sync with backend if authenticated
+    if (isAuthenticated) {
+      try {
+        await cartService.addToCart({
+          productId: product.id,
+          variantId: variant?.id,
+          quantity
+        });
+      } catch (err) {
+        console.error('Error syncing cart with backend:', err);
+      }
+    }
   };
 
-  const removeFromCart = (id) => {
+  const removeFromCart = async (id) => {
+    // Extract product/variant IDs from the composite ID
+    const [productId, variantId] = id.split('-');
+    
+    // Update local state immediately
     dispatch({
       type: CART_ACTIONS.REMOVE_ITEM,
       payload: { id },
     });
+
+    // Sync with backend if authenticated
+    if (isAuthenticated) {
+      try {
+        await cartService.removeFromCart(parseInt(productId), variantId !== 'default' ? parseInt(variantId) : null);
+      } catch (err) {
+        console.error('Error syncing cart removal with backend:', err);
+      }
+    }
   };
 
-  const updateQuantity = (id, quantity) => {
+  const updateQuantity = async (id, quantity) => {
+    // Extract product/variant IDs from the composite ID
+    const [productId, variantId] = id.split('-');
+    
+    // Update local state immediately
     dispatch({
       type: CART_ACTIONS.UPDATE_QUANTITY,
       payload: { id, quantity },
     });
+
+    // Sync with backend if authenticated
+    if (isAuthenticated) {
+      try {
+        await cartService.updateCartItem(parseInt(productId), {
+          variantId: variantId !== 'default' ? parseInt(variantId) : null,
+          quantity
+        });
+      } catch (err) {
+        console.error('Error syncing cart update with backend:', err);
+      }
+    }
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
+    // Update local state immediately
     dispatch({ type: CART_ACTIONS.CLEAR_CART });
+
+    // Sync with backend if authenticated
+    if (isAuthenticated) {
+      try {
+        await cartService.clearCart();
+      } catch (err) {
+        console.error('Error clearing cart on backend:', err);
+      }
+    }
   };
 
   const toggleCart = () => {

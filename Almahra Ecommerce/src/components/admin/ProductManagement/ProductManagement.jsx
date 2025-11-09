@@ -1,20 +1,73 @@
-import React, { useState } from 'react';
-import { products, frameTypes, frameShapes, materials } from '../../../data/mockData.js';
+import React, { useState, useEffect } from 'react';
+import productService from '../../../services/productService.js';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Lenskart exact options
+  const frameTypes = ['Full Rim', 'Half Rim', 'Rimless'];
+  const frameShapes = ['Rectangle', 'Round', 'Square', 'Oval', 'Cat-Eye', 'Aviator', 'Wayfarer', 'Clubmaster', 'Geometric'];
+  const materials = ['Acetate', 'Metal', 'Stainless Steel', 'Titanium', 'TR-90', 'Plastic', 'Wood', 'Mixed Material'];
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFrameType, setSelectedFrameType] = useState('all');
   const [selectedFrameShape, setSelectedFrameShape] = useState('all');
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  
+  // Form state for adding/editing products
+  const [formData, setFormData] = useState({
+    name: '',
+    brand: '',
+    price: '',
+    frameType: '',
+    frameShape: '',
+    material: '',
+    description: '',
+    stock: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Helper function to calculate total stock from variants
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await productService.getAllProducts();
+        console.log('Products response:', response);
+        setProducts(response.products || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        console.error('Error details:', err.response);
+        // Only show error for server errors, not empty data
+        if (err.response && err.response.status >= 500) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError(null);
+        }
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Helper function to calculate total stock from variants or direct stock
   const getTotalStock = (product) => {
+    // If product has direct stock field, use that
+    if (product.stock !== undefined && product.stock !== null) {
+      return product.stock;
+    }
+    // Otherwise try variants
     if (!product.variants || product.variants.length === 0) {
       return 0;
     }
-    return product.variants.reduce((total, variant) => total + variant.stock, 0);
+    return product.variants.reduce((total, variant) => total + (variant.stock || 0), 0);
   };
 
   const filteredProducts = products.filter(product => {
@@ -28,40 +81,121 @@ const ProductManagement = () => {
 
   const handleEdit = (productId) => {
     console.log('Edit product:', productId);
+    // TODO: Implement edit functionality
   };
 
-  const handleDelete = (productId) => {
-    console.log('Delete product:', productId);
+  const handleDelete = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) {
+      return;
+    }
+    
+    try {
+      await productService.deleteProduct(productId);
+      // Refresh products list
+      const response = await productService.getAllProducts();
+      setProducts(response.products || []);
+      alert('Product deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product. Please try again.');
+    }
   };
 
   const handleAddProduct = () => {
+    setFormData({
+      name: '',
+      brand: '',
+      price: '',
+      frameType: '',
+      frameShape: '',
+      material: '',
+      description: '',
+      stock: ''
+    });
     setShowAddModal(true);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.name || !formData.brand || !formData.price) {
+      alert('Please fill in all required fields (Name, Brand, Price)');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await productService.createProduct(formData);
+      
+      // Refresh products list
+      const response = await productService.getAllProducts();
+      setProducts(response.products || []);
+      
+      // Close modal and reset form
+      setShowAddModal(false);
+      setFormData({
+        name: '',
+        brand: '',
+        price: '',
+        frameType: '',
+        frameShape: '',
+        material: '',
+        description: '',
+        stock: ''
+      });
+      
+      alert('Product added successfully!');
+    } catch (error) {
+      console.error('Error creating product:', error);
+      alert('Failed to create product. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="product-management">
-      <div className="product-management__header">
-        <h1 className="product-management__title">Product Management</h1>
-        <button 
-          className="btn btn--primary btn--compact"
-          onClick={handleAddProduct}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          Add Product
-        </button>
-      </div>
+      {loading && (
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+          <p>Loading products...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div style={{ padding: '20px', backgroundColor: '#fee', color: '#c00', borderRadius: '4px', margin: '20px 0' }}>
+          {error}
+        </div>
+      )}
+      
+      {!loading && (
+        <>
+          <div className="product-management__header">
+            <h1 className="product-management__title">Product Management</h1>
+            <button 
+              className="btn btn--primary btn--compact"
+              onClick={handleAddProduct}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Add Product
+            </button>
+          </div>
 
       {/* Filters */}
       <div className="product-filters">
         <div className="search-box">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
           <input
             type="text"
             placeholder="Search products..."
@@ -77,9 +211,9 @@ const ProductManagement = () => {
           className="category-select"
         >
           <option value="all">All Frame Types</option>
-          {frameTypes.map(frameType => (
-            <option key={frameType.id} value={frameType.id}>
-              {frameType.name}
+          {frameTypes.map((frameType, index) => (
+            <option key={index} value={frameType}>
+              {frameType}
             </option>
           ))}
         </select>
@@ -90,9 +224,9 @@ const ProductManagement = () => {
           className="category-select"
         >
           <option value="all">All Frame Shapes</option>
-          {frameShapes.map(frameShape => (
-            <option key={frameShape.id} value={frameShape.id}>
-              {frameShape.name}
+          {frameShapes.map((frameShape, index) => (
+            <option key={index} value={frameShape}>
+              {frameShape}
             </option>
           ))}
         </select>
@@ -103,9 +237,9 @@ const ProductManagement = () => {
           className="category-select"
         >
           <option value="all">All Materials</option>
-          {materials.map(material => (
-            <option key={material.id} value={material.id}>
-              {material.name}
+          {materials.map((material, index) => (
+            <option key={index} value={material}>
+              {material}
             </option>
           ))}
         </select>
@@ -113,10 +247,17 @@ const ProductManagement = () => {
 
       {/* Products Grid */}
       <div className="products-grid">
-        {filteredProducts.map(product => (
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map(product => (
           <div key={product.id} className="product-card">
             <div className="product-card__image">
-              <img src={product.image} alt={product.name} />
+              <img 
+                src={product.primaryImage || product.image || '/placeholder-product.png'} 
+                alt={product.name}
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
+                }}
+              />
               <div className="product-card__overlay">
                 <button 
                   className="btn btn--secondary btn--sm"
@@ -135,10 +276,12 @@ const ProductManagement = () => {
             
             <div className="product-card__content">
               <h3 className="product-card__name">{product.name}</h3>
-              <p className="product-card__brand">{product.brand}</p>
+              <p className="product-card__brand">{product.brand || 'No Brand'}</p>
               <div className="product-card__details">
-                <span className="product-card__price">₹{product.price}</span>
-                <span className="product-card__category">{product.category}</span>
+                <span className="product-card__price">₹{product.price?.toLocaleString() || '0'}</span>
+                {product.frameType && (
+                  <span className="product-card__category">{product.frameType}</span>
+                )}
               </div>
               <div className="product-card__stock">
                 {(() => {
@@ -160,24 +303,27 @@ const ProductManagement = () => {
               </div>
             </div>
           </div>
-        ))}
-      </div>
-
-      {filteredProducts.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-state__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="m7.5 4.27 9 5.15"></path>
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-              <path d="m3.3 7 8.7 5 8.7-5"></path>
-              <path d="M12 22V12"></path>
-            </svg>
+          ))
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state__icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="m7.5 4.27 9 5.15"></path>
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                <path d="m3.3 7 8.7 5 8.7-5"></path>
+                <path d="M12 22V12"></path>
+              </svg>
+            </div>
+            <h3 className="empty-state__title">No products found</h3>
+            <p className="empty-state__message">
+              {products.length === 0 
+                ? "No products have been added yet. Click 'Add Product' to create your first product." 
+                : "Try adjusting your search terms or filters to find what you're looking for."}
+            </p>
           </div>
-          <h3 className="empty-state__title">No products found</h3>
-          <p className="empty-state__message">
-            Try adjusting your search terms or filters to find what you're looking for.
-          </p>
-        </div>
+        )}
+      </div>
+        </>
       )}
 
       {/* Add Product Modal */}
@@ -197,49 +343,87 @@ const ProductManagement = () => {
               </button>
             </div>
             <div className="modal__content">
-              <form className="product-form">
+              <form className="product-form" onSubmit={handleFormSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Product Name</label>
-                  <input type="text" className="form-input" placeholder="Enter product name" />
+                  <label className="form-label">Product Name *</label>
+                  <input 
+                    type="text" 
+                    name="name"
+                    className="form-input" 
+                    placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    required
+                  />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Brand</label>
-                  <input type="text" className="form-input" placeholder="Enter brand name" />
+                  <label className="form-label">Brand *</label>
+                  <input 
+                    type="text" 
+                    name="brand"
+                    className="form-input" 
+                    placeholder="Enter brand name"
+                    value={formData.brand}
+                    onChange={handleFormChange}
+                    required
+                  />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Price (₹)</label>
-                    <input type="number" className="form-input" placeholder="0" />
+                    <label className="form-label">Price (₹) *</label>
+                    <input 
+                      type="number" 
+                      name="price"
+                      className="form-input" 
+                      placeholder="0"
+                      value={formData.price}
+                      onChange={handleFormChange}
+                      required
+                      min="0"
+                    />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Category</label>
-                    <select className="form-select">
-                      <option value="">Select category</option>
-                      <option value="Sunglasses">Sunglasses</option>
-                      <option value="Prescription Glasses">Prescription Glasses</option>
-                      <option value="Reading Glasses">Reading Glasses</option>
-                    </select>
+                    <label className="form-label">Stock</label>
+                    <input 
+                      type="number" 
+                      name="stock"
+                      className="form-input" 
+                      placeholder="Available quantity"
+                      value={formData.stock}
+                      onChange={handleFormChange}
+                      min="0"
+                    />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Frame Type</label>
-                    <select className="form-select">
+                    <select 
+                      className="form-select"
+                      name="frameType"
+                      value={formData.frameType}
+                      onChange={handleFormChange}
+                    >
                       <option value="">Select frame type</option>
-                      {frameTypes.map(frameType => (
-                        <option key={frameType.id} value={frameType.id}>
-                          {frameType.name}
+                      {frameTypes.map((frameType, index) => (
+                        <option key={index} value={frameType}>
+                          {frameType}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Frame Shape</label>
-                    <select className="form-select">
+                    <select 
+                      className="form-select"
+                      name="frameShape"
+                      value={formData.frameShape}
+                      onChange={handleFormChange}
+                    >
                       <option value="">Select frame shape</option>
-                      {frameShapes.map(frameShape => (
-                        <option key={frameShape.id} value={frameShape.id}>
-                          {frameShape.name}
+                      {frameShapes.map((frameShape, index) => (
+                        <option key={index} value={frameShape}>
+                          {frameShape}
                         </option>
                       ))}
                     </select>
@@ -247,29 +431,41 @@ const ProductManagement = () => {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Material</label>
-                  <select className="form-select">
+                  <select 
+                    className="form-select"
+                    name="material"
+                    value={formData.material}
+                    onChange={handleFormChange}
+                  >
                     <option value="">Select material</option>
-                    {materials.map(material => (
-                      <option key={material.id} value={material.id}>
-                        {material.name}
+                    {materials.map((material, index) => (
+                      <option key={index} value={material}>
+                        {material}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Description</label>
-                  <textarea className="form-textarea" rows="4" placeholder="Enter product description"></textarea>
+                  <textarea 
+                    className="form-textarea" 
+                    rows="4" 
+                    name="description"
+                    placeholder="Enter product description"
+                    value={formData.description}
+                    onChange={handleFormChange}
+                  ></textarea>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Product Image</label>
                   <input type="file" className="form-input" accept="image/*" />
                 </div>
                 <div className="form-actions">
-                  <button type="button" className="btn btn--secondary" onClick={() => setShowAddModal(false)}>
+                  <button type="button" className="btn btn--secondary" onClick={() => setShowAddModal(false)} disabled={isSubmitting}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn--primary">
-                    Add Product
+                  <button type="submit" className="btn btn--primary" disabled={isSubmitting}>
+                    {isSubmitting ? 'Adding Product...' : 'Add Product'}
                   </button>
                 </div>
               </form>
